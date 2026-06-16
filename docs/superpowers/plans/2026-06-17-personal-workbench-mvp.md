@@ -241,7 +241,7 @@ data-issue-vault/waiting/.gitkeep
 - Create: `app/backend/models.py`
 - Create: `tests/test_models.py`
 
-- [ ] **Step 1: Write failing model tests**
+- [x] **Step 1: Write failing model tests**
 
 Create `tests/test_models.py`:
 
@@ -273,7 +273,7 @@ if __name__ == "__main__":
     unittest.main()
 ```
 
-- [ ] **Step 2: Run tests to verify failure**
+- [x] **Step 2: Run tests to verify failure**
 
 Run:
 
@@ -283,7 +283,7 @@ python3 -m unittest tests/test_models.py
 
 Expected: FAIL with `ModuleNotFoundError` or import error because `models.py` does not exist yet.
 
-- [ ] **Step 3: Implement domain models**
+- [x] **Step 3: Implement domain models**
 
 Create `app/backend/models.py`:
 
@@ -361,7 +361,7 @@ class Project:
         return f"{self.created}-{normalize_slug(self.title)}"
 ```
 
-- [ ] **Step 4: Run model tests**
+- [x] **Step 4: Run model tests**
 
 Run:
 
