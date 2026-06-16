@@ -953,7 +953,7 @@ Expected: PASS.
 - Create: `app/backend/app_state.py`
 - Modify: `tests/test_storage.py`
 
-- [ ] **Step 1: Add workflow test**
+- [x] **Step 1: Add workflow test**
 
 Append this test class to `tests/test_storage.py` before the `if __name__ == "__main__"` block:
 
@@ -979,7 +979,7 @@ class WorkbenchAppTests(unittest.TestCase):
             self.assertIn("炉温跳变", content)
 ```
 
-- [ ] **Step 2: Run workflow test to verify failure**
+- [x] **Step 2: Run workflow test to verify failure**
 
 Run:
 
@@ -989,7 +989,7 @@ python3 -m unittest tests/test_storage.py
 
 Expected: FAIL because `app_state.py` does not exist.
 
-- [ ] **Step 3: Implement workflow layer**
+- [x] **Step 3: Implement workflow layer**
 
 Create `app/backend/app_state.py`:
 
@@ -1036,7 +1036,7 @@ class WorkbenchApp:
         return [str(path) for path in self.storage.list_markdown_files()]
 ```
 
-- [ ] **Step 4: Run workflow tests**
+- [x] **Step 4: Run workflow tests**
 
 Run:
 

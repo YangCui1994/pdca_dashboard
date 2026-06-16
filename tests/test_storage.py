@@ -26,5 +26,26 @@ class StorageTests(unittest.TestCase):
             self.assertTrue((folder / "assets").is_dir())
 
 
+from app.backend.ai import FakeAIProvider
+from app.backend.app_state import WorkbenchApp
+
+
+class WorkbenchAppTests(unittest.TestCase):
+    def test_capture_with_ai_saves_markdown_and_ai_output(self):
+        with tempfile.TemporaryDirectory() as temp_dir:
+            app = WorkbenchApp(vault_root=Path(temp_dir), ai_provider=FakeAIProvider())
+            result = app.capture_with_ai(
+                raw_text="这个炉温跳变可能是平台清洗问题",
+                action="structure_capture",
+                title="炉温跳变",
+                kind="data-issue",
+            )
+            saved_path = Path(result["path"])
+            self.assertTrue(saved_path.exists())
+            content = saved_path.read_text(encoding="utf-8")
+            self.assertIn("[fake-ai]", content)
+            self.assertIn("炉温跳变", content)
+
+
 if __name__ == "__main__":
     unittest.main()
