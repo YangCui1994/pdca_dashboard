@@ -98,7 +98,7 @@ Responsibilities:
 - Create: `data-issue-vault/done/.gitkeep`
 - Create: `data-issue-vault/archive/.gitkeep`
 
-- [ ] **Step 1: Create package marker files**
+- [x] **Step 1: Create package marker files**
 
 Create `app/__init__.py`:
 
@@ -112,7 +112,7 @@ Create `app/backend/__init__.py`:
 """Backend modules for the local personal workbench."""
 ```
 
-- [ ] **Step 2: Create prompt template for idea critique**
+- [x] **Step 2: Create prompt template for idea critique**
 
 Create `app/prompts/idea_critique.md`:
 
@@ -143,7 +143,7 @@ Create `app/prompts/idea_critique.md`:
 {{input}}
 ```
 
-- [ ] **Step 3: Create prompt template for structured capture**
+- [x] **Step 3: Create prompt template for structured capture**
 
 Create `app/prompts/structure_capture.md`:
 
@@ -174,7 +174,7 @@ Create `app/prompts/structure_capture.md`:
 {{input}}
 ```
 
-- [ ] **Step 4: Create prompt template for daily review**
+- [x] **Step 4: Create prompt template for daily review**
 
 Create `app/prompts/daily_review.md`:
 
@@ -203,7 +203,7 @@ Create `app/prompts/daily_review.md`:
 {{input}}
 ```
 
-- [ ] **Step 5: Create vault marker files**
+- [x] **Step 5: Create vault marker files**
 
 Create empty `.gitkeep` files in each vault folder listed above. If using a shell:
 
@@ -212,7 +212,7 @@ mkdir -p data-issue-vault/inbox data-issue-vault/active data-issue-vault/waiting
 touch data-issue-vault/inbox/.gitkeep data-issue-vault/active/.gitkeep data-issue-vault/waiting/.gitkeep data-issue-vault/done/.gitkeep data-issue-vault/archive/.gitkeep
 ```
 
-- [ ] **Step 6: Verify skeleton**
+- [x] **Step 6: Verify skeleton**
 
 Run:
 
