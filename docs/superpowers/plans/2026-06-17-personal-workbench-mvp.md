@@ -1170,7 +1170,7 @@ Expected output contains:
 - Create: `app/frontend/styles.css`
 - Create: `app/frontend/app.js`
 
-- [ ] **Step 1: Create HTML shell**
+- [x] **Step 1: Create HTML shell**
 
 Create `app/frontend/index.html`:
 
@@ -1233,7 +1233,7 @@ Create `app/frontend/index.html`:
 </html>
 ```
 
-- [ ] **Step 2: Create CSS**
+- [x] **Step 2: Create CSS**
 
 Create `app/frontend/styles.css`:
 
@@ -1348,7 +1348,7 @@ button:hover {
 }
 ```
 
-- [ ] **Step 3: Create frontend behavior**
+- [x] **Step 3: Create frontend behavior**
 
 Create `app/frontend/app.js`:
 
@@ -1410,7 +1410,7 @@ refreshFiles.addEventListener("click", refreshFileList);
 refreshFileList();
 ```
 
-- [ ] **Step 4: Run frontend smoke check**
+- [x] **Step 4: Run frontend smoke check**
 
 Run:
 

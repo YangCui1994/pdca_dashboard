@@ -1,0 +1,56 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Personal Workbench</title>
+    <link rel="stylesheet" href="/styles.css">
+  </head>
+  <body>
+    <main class="workspace">
+      <aside class="panel inbox-panel">
+        <div class="panel-header">
+          <h1>Workbench</h1>
+          <button id="refreshFiles" title="刷新文件列表">↻</button>
+        </div>
+        <ul id="fileList" class="file-list"></ul>
+      </aside>
+
+      <section class="panel capture-panel">
+        <label>
+          标题
+          <input id="titleInput" type="text" value="未命名输入">
+        </label>
+        <label>
+          类型
+          <select id="kindInput">
+            <option value="idea">idea</option>
+            <option value="task">task</option>
+            <option value="project-note">project-note</option>
+            <option value="data-issue">data-issue</option>
+            <option value="communication-draft">communication-draft</option>
+          </select>
+        </label>
+        <label>
+          原始输入
+          <textarea id="rawInput" rows="16" placeholder="写下异常、想法、领导需求、沟通草稿或字段口径疑问"></textarea>
+        </label>
+      </section>
+
+      <section class="panel ai-panel">
+        <div class="actions">
+          <button data-action="structure_capture">整理成卡片</button>
+          <button data-action="idea_critique">犀利审查 idea</button>
+          <button data-action="daily_review">生成日复盘</button>
+        </div>
+        <div id="statusText" class="status-text">等待输入。</div>
+        <label>
+          AI 输出
+          <textarea id="aiOutput" rows="20"></textarea>
+        </label>
+        <div class="saved-path" id="savedPath"></div>
+      </section>
+    </main>
+    <script src="/app.js"></script>
+  </body>
+</html>

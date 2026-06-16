@@ -1,0 +1,108 @@
+:root {
+  color-scheme: light;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  background: #f6f7f2;
+  color: #1f2933;
+}
+
+body {
+  margin: 0;
+}
+
+.workspace {
+  display: grid;
+  grid-template-columns: 280px minmax(360px, 1fr) minmax(360px, 1fr);
+  gap: 1px;
+  min-height: 100vh;
+  background: #c8d0d8;
+}
+
+.panel {
+  background: #ffffff;
+  padding: 18px;
+  overflow: auto;
+}
+
+.panel-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+h1 {
+  font-size: 20px;
+  margin: 0;
+}
+
+label {
+  display: grid;
+  gap: 8px;
+  margin-bottom: 16px;
+  font-size: 13px;
+  font-weight: 650;
+}
+
+input,
+select,
+textarea {
+  box-sizing: border-box;
+  width: 100%;
+  border: 1px solid #c8d0d8;
+  border-radius: 6px;
+  padding: 10px;
+  font: inherit;
+}
+
+textarea {
+  resize: vertical;
+  line-height: 1.5;
+}
+
+button {
+  border: 1px solid #9aa6b2;
+  border-radius: 6px;
+  background: #1f2933;
+  color: #ffffff;
+  padding: 9px 12px;
+  font: inherit;
+  cursor: pointer;
+}
+
+button:hover {
+  background: #334155;
+}
+
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 14px;
+}
+
+.status-text,
+.saved-path {
+  min-height: 22px;
+  margin-bottom: 12px;
+  color: #52606d;
+  font-size: 13px;
+}
+
+.file-list {
+  list-style: none;
+  padding: 0;
+  margin: 16px 0 0;
+}
+
+.file-list li {
+  border-bottom: 1px solid #e4e7eb;
+  padding: 8px 0;
+  font-size: 13px;
+  overflow-wrap: anywhere;
+}
+
+@media (max-width: 960px) {
+  .workspace {
+    grid-template-columns: 1fr;
+  }
+}
