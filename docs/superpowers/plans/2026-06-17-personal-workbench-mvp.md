@@ -663,7 +663,7 @@ Expected: PASS.
 - Create: `app/backend/ai.py`
 - Create: `tests/test_ai.py`
 
-- [ ] **Step 1: Write failing AI tests**
+- [x] **Step 1: Write failing AI tests**
 
 Create `tests/test_ai.py`:
 
@@ -703,7 +703,7 @@ if __name__ == "__main__":
     unittest.main()
 ```
 
-- [ ] **Step 2: Run tests to verify failure**
+- [x] **Step 2: Run tests to verify failure**
 
 Run:
 
@@ -713,7 +713,7 @@ python3 -m unittest tests/test_ai.py
 
 Expected: FAIL because `ai.py` and `prompts.py` do not exist.
 
-- [ ] **Step 3: Implement prompt rendering**
+- [x] **Step 3: Implement prompt rendering**
 
 Create `app/backend/prompts.py`:
 
@@ -728,7 +728,7 @@ def render_prompt(template_path: Path, user_input: str) -> str:
     return template.replace("{{input}}", user_input)
 ```
 
-- [ ] **Step 4: Implement AI providers**
+- [x] **Step 4: Implement AI providers**
 
 Create `app/backend/ai.py`:
 
@@ -771,7 +771,7 @@ class HermesCLIProvider:
         return completed.stdout.strip()
 ```
 
-- [ ] **Step 5: Run AI tests**
+- [x] **Step 5: Run AI tests**
 
 Run:
 
