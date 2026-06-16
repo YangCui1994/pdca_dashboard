@@ -4,7 +4,7 @@
 
 **Goal:** Build an extensible local web workbench that turns scattered work ideas, project tasks, AI critiques, daily plans, and follow-up notes into structured Markdown files.
 
-**Architecture:** Use a dependency-light local app: Python standard-library HTTP backend, static HTML/CSS/JS frontend, Markdown vault storage, and a pluggable AI provider interface. The first AI provider calls Hermes through `hermes -z`, while the rest of the system talks only to a local `AIProvider` abstraction so Hermes proxy, aigate, or OpenCode can replace it later.
+**Architecture:** Use a dependency-light local app: Python standard-library HTTP backend, static HTML/CSS/JS frontend, Markdown vault storage, and a pluggable AI provider interface. The first AI provider calls Hermes through `hermes -z`, while the rest of the system talks only to a local `AIProvider` abstraction so Hermes proxy, aigate, or OpenCode can replace it later. AI actions also pass through a lightweight agent execution mode layer so simple document work can use one agent, while important decisions can later use Round Table debate or layered approval without rewriting the app workflow.
 
 **Tech Stack:** Python 3 standard library, `unittest`, static HTML/CSS/JavaScript, local Markdown files, Hermes Agent CLI.
 
@@ -34,6 +34,10 @@ Key product decisions already made:
 - Daily planning uses a candidate pool. The user manually selects today's work.
 - Unfinished items require a reason before being moved. Personal blockers and external blockers route differently.
 - First implementation keeps AI suggestions at the project level. Task-level suggestions can be added after the project-level flow works.
+- Agent execution must be selectable by mode. MVP implements the interface and keeps actual execution on `single` mode; `round-table` and `approval-chain` are represented as validated orchestration plans so later work can add multi-agent debate or staged review without changing capture, storage, or prompt APIs.
+- Use `single` mode for information completion, document cleanup, summaries, and routine AI formatting.
+- Use `round-table` mode for important decisions where different perspectives should argue before a recommendation is saved, such as product direction, prioritization, architecture choices, or high-risk communication strategy.
+- Use `approval-chain` mode when output should pass through sequential checks, such as draft -> risk review -> final decision, or agent proposal -> human-ready recommendation.
 
 ## File Structure
 
@@ -45,6 +49,7 @@ app/
   backend/
     __init__.py
     ai.py
+    agent_modes.py
     app_state.py
     markdown.py
     models.py
@@ -66,6 +71,7 @@ data-issue-vault/
   done/
   archive/
 tests/
+  test_agent_modes.py
   test_ai.py
   test_markdown.py
   test_models.py
@@ -79,6 +85,7 @@ Responsibilities:
 - `storage.py`: safe file and folder creation inside the local vault.
 - `prompts.py`: load prompt templates and render prompts with capture text.
 - `ai.py`: provider interface, fake provider, Hermes CLI provider.
+- `agent_modes.py`: validated orchestration plans for `single`, `round-table`, and `approval-chain` execution modes.
 - `app_state.py`: high-level workflows used by HTTP routes.
 - `server.py`: local JSON API and static file serving.
 - `frontend/*`: three-column workbench UI.
@@ -770,6 +777,172 @@ Run:
 
 ```bash
 python3 -m unittest tests/test_ai.py
+```
+
+Expected: PASS.
+
+## Task 5A: Define Agent Execution Modes
+
+**Files:**
+- Create: `app/backend/agent_modes.py`
+- Create: `tests/test_agent_modes.py`
+
+This task adds the interface for selecting how an AI action should be executed. MVP execution still uses one provider call, but the workflow can now carry a validated orchestration plan for future modes.
+
+- `single`: one agent completes the task. Use for information completion, document cleanup, summarization, and routine formatting.
+- `round-table`: multiple named roles debate a high-stakes decision before producing a recommendation. Use for product direction, prioritization, architecture choices, or sensitive communication strategy.
+- `approval-chain`: output passes through ordered reviewers before being accepted. Use for proposal review, risk review, or human-ready finalization.
+
+- [ ] **Step 1: Write failing agent mode tests**
+
+Create `tests/test_agent_modes.py`:
+
+```python
+import unittest
+
+from app.backend.agent_modes import (
+    AgentRole,
+    create_approval_chain_plan,
+    create_round_table_plan,
+    create_single_agent_plan,
+)
+
+
+class AgentModeTests(unittest.TestCase):
+    def test_single_agent_plan_has_one_executor_role(self):
+        plan = create_single_agent_plan(action="structure_capture", prompt="整理这段输入")
+        self.assertEqual(plan.mode, "single")
+        self.assertEqual([role.name for role in plan.roles], ["executor"])
+        self.assertEqual(plan.approval_steps, [])
+
+    def test_round_table_requires_at_least_two_roles(self):
+        with self.assertRaises(ValueError):
+            create_round_table_plan(
+                prompt="是否推进这个项目",
+                roles=[AgentRole(name="product", responsibility="判断用户价值")],
+            )
+
+    def test_round_table_keeps_role_responsibilities(self):
+        plan = create_round_table_plan(
+            prompt="是否推进这个项目",
+            roles=[
+                AgentRole(name="product", responsibility="判断用户价值"),
+                AgentRole(name="engineering", responsibility="判断实现成本"),
+                AgentRole(name="risk", responsibility="指出推进风险"),
+            ],
+        )
+        self.assertEqual(plan.mode, "round-table")
+        self.assertEqual(plan.roles[1].responsibility, "判断实现成本")
+
+    def test_approval_chain_preserves_ordered_review_steps(self):
+        plan = create_approval_chain_plan(
+            prompt="生成领导反馈草稿",
+            reviewers=["risk-review", "final-editor"],
+        )
+        self.assertEqual(plan.mode, "approval-chain")
+        self.assertEqual(plan.approval_steps, ["risk-review", "final-editor"])
+
+
+if __name__ == "__main__":
+    unittest.main()
+```
+
+- [ ] **Step 2: Run tests to verify failure**
+
+Run:
+
+```bash
+python3 -m unittest tests/test_agent_modes.py
+```
+
+Expected: FAIL because `agent_modes.py` does not exist.
+
+- [ ] **Step 3: Implement agent mode data structures**
+
+Create `app/backend/agent_modes.py`:
+
+```python
+from __future__ import annotations
+
+from dataclasses import dataclass, field
+from typing import Literal
+
+
+AgentExecutionMode = Literal["single", "round-table", "approval-chain"]
+
+AGENT_EXECUTION_MODES = {"single", "round-table", "approval-chain"}
+
+
+@dataclass(frozen=True)
+class AgentRole:
+    name: str
+    responsibility: str
+
+    def __post_init__(self) -> None:
+        if not self.name.strip():
+            raise ValueError("Agent role name is required")
+        if not self.responsibility.strip():
+            raise ValueError("Agent role responsibility is required")
+
+
+@dataclass(frozen=True)
+class AgentExecutionPlan:
+    mode: AgentExecutionMode
+    prompt: str
+    roles: list[AgentRole] = field(default_factory=list)
+    approval_steps: list[str] = field(default_factory=list)
+
+    def __post_init__(self) -> None:
+        if self.mode not in AGENT_EXECUTION_MODES:
+            raise ValueError(f"Unsupported agent execution mode: {self.mode}")
+        if not self.prompt.strip():
+            raise ValueError("Agent execution prompt is required")
+        if self.mode == "single" and len(self.roles) != 1:
+            raise ValueError("Single agent mode requires exactly one role")
+        if self.mode == "round-table" and len(self.roles) < 2:
+            raise ValueError("Round table mode requires at least two roles")
+        if self.mode == "approval-chain" and not self.approval_steps:
+            raise ValueError("Approval chain mode requires at least one approval step")
+
+
+def create_single_agent_plan(action: str, prompt: str) -> AgentExecutionPlan:
+    return AgentExecutionPlan(
+        mode="single",
+        prompt=prompt,
+        roles=[AgentRole(name="executor", responsibility=f"Complete AI action: {action}")],
+    )
+
+
+def create_round_table_plan(prompt: str, roles: list[AgentRole]) -> AgentExecutionPlan:
+    return AgentExecutionPlan(mode="round-table", prompt=prompt, roles=roles)
+
+
+def create_approval_chain_plan(prompt: str, reviewers: list[str]) -> AgentExecutionPlan:
+    clean_reviewers = [reviewer.strip() for reviewer in reviewers if reviewer.strip()]
+    return AgentExecutionPlan(
+        mode="approval-chain",
+        prompt=prompt,
+        roles=[AgentRole(name="executor", responsibility="Create the first draft")],
+        approval_steps=clean_reviewers,
+    )
+```
+
+- [ ] **Step 4: Run agent mode tests**
+
+Run:
+
+```bash
+python3 -m unittest tests/test_agent_modes.py
+```
+
+Expected: PASS.
+
+- [ ] **Step 5: Run all tests**
+
+Run:
+
+```bash
+python3 -m unittest discover tests
 ```
 
 Expected: PASS.
