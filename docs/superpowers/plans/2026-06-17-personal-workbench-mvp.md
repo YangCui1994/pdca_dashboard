@@ -555,7 +555,7 @@ Expected: PASS.
 - Create: `app/backend/storage.py`
 - Create: `tests/test_storage.py`
 
-- [ ] **Step 1: Write failing storage tests**
+- [x] **Step 1: Write failing storage tests**
 
 Create `tests/test_storage.py`:
 
@@ -592,7 +592,7 @@ if __name__ == "__main__":
     unittest.main()
 ```
 
-- [ ] **Step 2: Run tests to verify failure**
+- [x] **Step 2: Run tests to verify failure**
 
 Run:
 
@@ -602,7 +602,7 @@ python3 -m unittest tests/test_storage.py
 
 Expected: FAIL because `storage.py` does not exist.
 
-- [ ] **Step 3: Implement vault storage**
+- [x] **Step 3: Implement vault storage**
 
 Create `app/backend/storage.py`:
 
@@ -646,7 +646,7 @@ class VaultStorage:
         return sorted(self.root.glob("**/*.md"))
 ```
 
-- [ ] **Step 4: Run storage tests**
+- [x] **Step 4: Run storage tests**
 
 Run:
 
