@@ -793,7 +793,7 @@ This task adds the interface for selecting how an AI action should be executed. 
 - `round-table`: multiple named roles debate a high-stakes decision before producing a recommendation. Use for product direction, prioritization, architecture choices, or sensitive communication strategy.
 - `approval-chain`: output passes through ordered reviewers before being accepted. Use for proposal review, risk review, or human-ready finalization.
 
-- [ ] **Step 1: Write failing agent mode tests**
+- [x] **Step 1: Write failing agent mode tests**
 
 Create `tests/test_agent_modes.py`:
 
@@ -847,7 +847,7 @@ if __name__ == "__main__":
     unittest.main()
 ```
 
-- [ ] **Step 2: Run tests to verify failure**
+- [x] **Step 2: Run tests to verify failure**
 
 Run:
 
@@ -857,7 +857,7 @@ python3 -m unittest tests/test_agent_modes.py
 
 Expected: FAIL because `agent_modes.py` does not exist.
 
-- [ ] **Step 3: Implement agent mode data structures**
+- [x] **Step 3: Implement agent mode data structures**
 
 Create `app/backend/agent_modes.py`:
 
@@ -927,7 +927,7 @@ def create_approval_chain_plan(prompt: str, reviewers: list[str]) -> AgentExecut
     )
 ```
 
-- [ ] **Step 4: Run agent mode tests**
+- [x] **Step 4: Run agent mode tests**
 
 Run:
 
@@ -937,7 +937,7 @@ python3 -m unittest tests/test_agent_modes.py
 
 Expected: PASS.
 
-- [ ] **Step 5: Run all tests**
+- [x] **Step 5: Run all tests**
 
 Run:
 
