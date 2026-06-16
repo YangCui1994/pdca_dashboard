@@ -377,7 +377,7 @@ Expected: PASS.
 - Create: `app/backend/markdown.py`
 - Create: `tests/test_markdown.py`
 
-- [ ] **Step 1: Write failing Markdown tests**
+- [x] **Step 1: Write failing Markdown tests**
 
 Create `tests/test_markdown.py`:
 
@@ -418,7 +418,7 @@ if __name__ == "__main__":
     unittest.main()
 ```
 
-- [ ] **Step 2: Run tests to verify failure**
+- [x] **Step 2: Run tests to verify failure**
 
 Run:
 
@@ -428,7 +428,7 @@ python3 -m unittest tests/test_markdown.py
 
 Expected: FAIL because `markdown.py` does not exist.
 
-- [ ] **Step 3: Implement Markdown rendering**
+- [x] **Step 3: Implement Markdown rendering**
 
 Create `app/backend/markdown.py`:
 
@@ -532,7 +532,7 @@ tags:
 """
 ```
 
-- [ ] **Step 4: Run Markdown tests**
+- [x] **Step 4: Run Markdown tests**
 
 Run:
 
