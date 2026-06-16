@@ -1051,7 +1051,7 @@ Expected: PASS.
 **Files:**
 - Create: `app/backend/server.py`
 
-- [ ] **Step 1: Create server with JSON routes and static serving**
+- [x] **Step 1: Create server with JSON routes and static serving**
 
 Create `app/backend/server.py`:
 
@@ -1148,7 +1148,7 @@ if __name__ == "__main__":
     main()
 ```
 
-- [ ] **Step 2: Run import check**
+- [x] **Step 2: Run import check**
 
 Run:
 
