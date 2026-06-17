@@ -1477,7 +1477,7 @@ Expected result:
 **Files:**
 - No file changes.
 
-- [ ] **Step 1: Run all automated tests**
+- [x] **Step 1: Run all automated tests**
 
 Run:
 
@@ -1487,7 +1487,7 @@ python3 -m unittest discover -s tests -v
 
 Expected: all tests pass.
 
-- [ ] **Step 2: Verify no placeholders in created source files**
+- [x] **Step 2: Verify no placeholders in created source files**
 
 Run:
 
@@ -1497,7 +1497,7 @@ rg -n "T[B]D|TO[D]O|implement [l]ater|fill in [d]etails" app tests docs/superpow
 
 Expected: no matches in `app/` or `tests/`. The plan file may contain the phrase list in the skill-derived self-review section only if copied there; this plan avoids those markers in implementation steps.
 
-- [ ] **Step 3: Verify vault output**
+- [x] **Step 3: Verify vault output**
 
 Run:
 
@@ -1507,7 +1507,7 @@ find data-issue-vault -maxdepth 3 -type f | sort
 
 Expected: marker files are present, and after browser testing at least one `.md` file exists under `data-issue-vault/inbox/`.
 
-- [ ] **Step 4: Check Git availability**
+- [x] **Step 4: Check Git availability**
 
 Run:
 
