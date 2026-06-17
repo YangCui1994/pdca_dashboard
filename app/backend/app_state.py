@@ -37,4 +37,4 @@ class WorkbenchApp:
         return {"path": str(path), "ai_output": ai_output}
 
     def list_files(self) -> list[str]:
-        return [str(path) for path in self.storage.list_markdown_files()]
+        return [str(path) for path in self.storage.list_work_items()]
