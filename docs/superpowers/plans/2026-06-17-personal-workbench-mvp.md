@@ -1432,7 +1432,7 @@ Open `http://127.0.0.1:8765`, enter text, click `整理成卡片`, and confirm a
 **Files:**
 - No file changes.
 
-- [ ] **Step 1: Test Hermes directly**
+- [x] **Step 1: Test Hermes directly**
 
 Run:
 
@@ -1442,7 +1442,7 @@ Run:
 
 Expected: final response contains `Hermes OK` or a close Chinese equivalent confirming the request.
 
-- [ ] **Step 2: Run server with Hermes provider**
+- [x] **Step 2: Run server with Hermes provider**
 
 Run:
 
@@ -1457,7 +1457,7 @@ Workbench running at http://127.0.0.1:8765
 AI provider: hermes
 ```
 
-- [ ] **Step 3: Test one AI action through the browser**
+- [x] **Step 3: Test one AI action through the browser**
 
 Open `http://127.0.0.1:8765`, enter:
 
