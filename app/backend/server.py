@@ -4,7 +4,7 @@ import argparse
 import json
 from http.server import SimpleHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
-from urllib.parse import urlparse
+from urllib.parse import parse_qs, urlparse
 
 from app.backend.ai import FakeAIProvider, HermesCLIProvider
 from app.backend.app_state import WorkbenchApp
@@ -27,6 +27,14 @@ class WorkbenchHandler(SimpleHTTPRequestHandler):
         if parsed.path == "/api/files":
             self._send_json({"files": self.app_state.list_files()})
             return
+        if parsed.path == "/api/work-item":
+            path = self._query_value(parsed.query, "path")
+            self._send_json(self.app_state.get_work_item(path))
+            return
+        if parsed.path == "/api/agent-context":
+            path = self._query_value(parsed.query, "path")
+            self._send_json({"context": self.app_state.render_agent_context(path)})
+            return
         if parsed.path == "/":
             self.path = "/index.html"
         return super().do_GET()
@@ -42,6 +50,16 @@ class WorkbenchHandler(SimpleHTTPRequestHandler):
                 kind=payload.get("kind", "idea"),
             )
             self._send_json(result)
+            return
+        if parsed.path == "/api/work-item":
+            payload = self._read_json()
+            self.app_state.save_work_item(
+                path=payload.get("path", ""),
+                task=payload.get("task", ""),
+                context=payload.get("context", ""),
+                ai_notes=payload.get("ai_notes", ""),
+            )
+            self._send_json({"ok": True})
             return
         self.send_error(404, "Route not found")
 
@@ -64,6 +82,10 @@ class WorkbenchHandler(SimpleHTTPRequestHandler):
         self.send_header("Content-Length", str(len(encoded)))
         self.end_headers()
         self.wfile.write(encoded)
+
+    def _query_value(self, query: str, key: str) -> str:
+        values = parse_qs(query).get(key, [])
+        return values[0] if values else ""
 
 
 def main() -> None:

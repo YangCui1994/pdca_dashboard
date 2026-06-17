@@ -38,3 +38,12 @@ class WorkbenchApp:
 
     def list_files(self) -> list[str]:
         return [str(path) for path in self.storage.list_work_items()]
+
+    def get_work_item(self, path: str) -> dict:
+        return self.storage.read_work_item(path)
+
+    def save_work_item(self, path: str, task: str, context: str, ai_notes: str) -> None:
+        self.storage.save_work_item(path, task=task, context=context, ai_notes=ai_notes)
+
+    def render_agent_context(self, path: str) -> str:
+        return self.storage.render_agent_context(path)

@@ -1,0 +1,54 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Task Detail</title>
+    <link rel="stylesheet" href="/styles.css?v=detail">
+  </head>
+  <body>
+    <main class="detail-shell">
+      <header class="detail-header">
+        <a class="back-link" href="/">返回</a>
+        <div>
+          <h1 id="detailTitle">Task Detail</h1>
+          <p id="detailPath" class="detail-path"></p>
+        </div>
+        <div class="detail-actions">
+          <button id="saveButton" type="button">保存</button>
+          <button id="agentContextButton" type="button">读取上下文</button>
+        </div>
+      </header>
+
+      <section class="detail-grid">
+        <div class="detail-editor">
+          <label>
+            task.md
+            <textarea id="taskEditor" rows="18"></textarea>
+          </label>
+          <label>
+            context.md
+            <textarea id="contextEditor" rows="12"></textarea>
+          </label>
+          <label>
+            ai-notes.md
+            <textarea id="aiNotesEditor" rows="12"></textarea>
+          </label>
+        </div>
+
+        <aside class="detail-side">
+          <div id="detailStatus" class="status-text">加载中。</div>
+          <section>
+            <h2>Assets</h2>
+            <ul id="assetList" class="asset-list"></ul>
+          </section>
+          <label>
+            Agent Context
+            <textarea id="agentContextOutput" rows="26" readonly></textarea>
+          </label>
+        </aside>
+      </section>
+    </main>
+    <script src="/detail.js?v=detail"></script>
+  </body>
+</html>

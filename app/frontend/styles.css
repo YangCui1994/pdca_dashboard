@@ -132,6 +132,19 @@ button:hover {
   overflow-wrap: anywhere;
 }
 
+.file-list a,
+.board-card,
+.back-link {
+  color: inherit;
+  text-decoration: none;
+}
+
+.file-list a:hover,
+.board-card:hover,
+.back-link:hover {
+  color: #0f5e9c;
+}
+
 .board-panel {
   grid-column: 2 / -1;
 }
@@ -176,6 +189,7 @@ button:hover {
 }
 
 .board-card {
+  display: block;
   border: 1px solid #d9e2ec;
   border-radius: 6px;
   background: #ffffff;
@@ -197,6 +211,60 @@ button:hover {
   overflow-wrap: anywhere;
 }
 
+.detail-shell {
+  min-height: 100vh;
+  background: #eef2f6;
+}
+
+.detail-header {
+  display: grid;
+  grid-template-columns: 90px 1fr auto;
+  gap: 18px;
+  align-items: center;
+  border-bottom: 1px solid #d9e2ec;
+  background: #ffffff;
+  padding: 16px 20px;
+}
+
+.detail-path {
+  margin: 6px 0 0;
+  color: #627386;
+  font-size: 12px;
+  overflow-wrap: anywhere;
+}
+
+.detail-actions {
+  display: flex;
+  gap: 8px;
+}
+
+.detail-grid {
+  display: grid;
+  grid-template-columns: minmax(420px, 1fr) minmax(320px, 420px);
+  gap: 1px;
+  min-height: calc(100vh - 75px);
+  background: #c8d0d8;
+}
+
+.detail-editor,
+.detail-side {
+  background: #ffffff;
+  padding: 18px;
+  overflow: auto;
+}
+
+.detail-side h2 {
+  margin: 0 0 10px;
+  font-size: 15px;
+}
+
+.asset-list {
+  margin: 0 0 16px;
+  padding-left: 18px;
+  color: #52606d;
+  font-size: 13px;
+}
+
 @media (max-width: 960px) {
   .workspace,
   .workspace.board-mode {
@@ -210,5 +278,14 @@ button:hover {
   .board-grid {
     grid-template-columns: 1fr;
     min-height: auto;
+  }
+
+  .detail-header,
+  .detail-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .detail-actions {
+    flex-wrap: wrap;
   }
 }

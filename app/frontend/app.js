@@ -20,7 +20,11 @@ function titleFromPath(file) {
 
 function statusFromPath(file) {
   const parts = file.split("/");
-  return boardStatuses.includes(parts[1]) ? parts[1] : "inbox";
+  return parts.find((part) => boardStatuses.includes(part)) || "inbox";
+}
+
+function detailUrl(file) {
+  return `/detail.html?path=${encodeURIComponent(file)}`;
 }
 
 async function refreshFileList() {
@@ -35,7 +39,10 @@ function renderFileList(files) {
   fileList.innerHTML = "";
   for (const file of files) {
     const item = document.createElement("li");
-    item.textContent = file;
+    const link = document.createElement("a");
+    link.href = detailUrl(file);
+    link.textContent = file;
+    item.appendChild(link);
     fileList.appendChild(item);
   }
 }
@@ -59,8 +66,9 @@ function renderBoard(files) {
     const cards = document.createElement("div");
     cards.className = "board-cards";
     for (const file of grouped[status]) {
-      const card = document.createElement("article");
+      const card = document.createElement("a");
       card.className = "board-card";
+      card.href = detailUrl(file);
 
       const title = document.createElement("h2");
       title.textContent = titleFromPath(file);
