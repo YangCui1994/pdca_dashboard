@@ -4,7 +4,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Personal Workbench</title>
-    <link rel="stylesheet" href="/styles.css">
+    <link rel="stylesheet" href="/styles.css?v=kanban">
   </head>
   <body>
     <main class="workspace">
@@ -13,8 +13,16 @@
           <h1>Workbench</h1>
           <button id="refreshFiles" title="刷新文件列表">↻</button>
         </div>
+        <div class="view-toggle" aria-label="视图切换">
+          <button class="view-button is-active" type="button" data-view="list">列表</button>
+          <button class="view-button" type="button" data-view="board">看板</button>
+        </div>
         <ul id="fileList" class="file-list"></ul>
       </aside>
+
+      <section class="panel board-panel" id="boardPanel" hidden>
+        <div class="board-grid" id="boardGrid"></div>
+      </section>
 
       <section class="panel capture-panel">
         <label>
@@ -51,6 +59,6 @@
         <div class="saved-path" id="savedPath"></div>
       </section>
     </main>
-    <script src="/app.js"></script>
+    <script src="/app.js?v=kanban"></script>
   </body>
 </html>

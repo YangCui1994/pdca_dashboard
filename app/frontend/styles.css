@@ -17,6 +17,15 @@ body {
   background: #c8d0d8;
 }
 
+.workspace.board-mode {
+  grid-template-columns: 280px 1fr;
+}
+
+.workspace.board-mode .capture-panel,
+.workspace.board-mode .ai-panel {
+  display: none;
+}
+
 .panel {
   background: #ffffff;
   padding: 18px;
@@ -33,6 +42,28 @@ body {
 h1 {
   font-size: 20px;
   margin: 0;
+}
+
+.view-toggle {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0;
+  margin-top: 16px;
+  border: 1px solid #c8d0d8;
+  border-radius: 6px;
+  overflow: hidden;
+}
+
+.view-button {
+  border: 0;
+  border-radius: 0;
+  background: #ffffff;
+  color: #334155;
+}
+
+.view-button.is-active {
+  background: #1f2933;
+  color: #ffffff;
 }
 
 label {
@@ -101,8 +132,83 @@ button:hover {
   overflow-wrap: anywhere;
 }
 
+.board-panel {
+  grid-column: 2 / -1;
+}
+
+.board-grid {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(160px, 1fr));
+  gap: 12px;
+  min-height: calc(100vh - 36px);
+}
+
+.board-column {
+  min-width: 0;
+  background: #f8fafc;
+  border: 1px solid #d9e2ec;
+  border-radius: 6px;
+  padding: 10px;
+}
+
+.board-column-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 10px;
+  color: #334155;
+  font-size: 13px;
+  font-weight: 700;
+  text-transform: capitalize;
+}
+
+.board-column-header strong {
+  min-width: 24px;
+  border-radius: 999px;
+  background: #e4e7eb;
+  padding: 2px 7px;
+  text-align: center;
+}
+
+.board-cards {
+  display: grid;
+  gap: 8px;
+}
+
+.board-card {
+  border: 1px solid #d9e2ec;
+  border-radius: 6px;
+  background: #ffffff;
+  padding: 10px;
+}
+
+.board-card h2 {
+  margin: 0 0 8px;
+  font-size: 14px;
+  line-height: 1.35;
+  overflow-wrap: anywhere;
+}
+
+.board-card p {
+  margin: 0;
+  color: #627386;
+  font-size: 12px;
+  line-height: 1.4;
+  overflow-wrap: anywhere;
+}
+
 @media (max-width: 960px) {
-  .workspace {
+  .workspace,
+  .workspace.board-mode {
     grid-template-columns: 1fr;
+  }
+
+  .board-panel {
+    grid-column: auto;
+  }
+
+  .board-grid {
+    grid-template-columns: 1fr;
+    min-height: auto;
   }
 }

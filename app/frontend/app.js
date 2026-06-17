@@ -6,15 +6,83 @@ const statusText = document.querySelector("#statusText");
 const savedPath = document.querySelector("#savedPath");
 const fileList = document.querySelector("#fileList");
 const refreshFiles = document.querySelector("#refreshFiles");
+const boardPanel = document.querySelector("#boardPanel");
+const boardGrid = document.querySelector("#boardGrid");
+const viewButtons = document.querySelectorAll("[data-view]");
+
+const boardStatuses = ["inbox", "active", "waiting", "done", "archive"];
+let currentFiles = [];
+
+function titleFromPath(file) {
+  const filename = file.split("/").pop() || file;
+  return filename.replace(/^\d{4}-\d{2}-\d{2}-/, "").replace(/\.md$/, "");
+}
+
+function statusFromPath(file) {
+  const parts = file.split("/");
+  return boardStatuses.includes(parts[1]) ? parts[1] : "inbox";
+}
 
 async function refreshFileList() {
   const response = await fetch("/api/files");
   const payload = await response.json();
+  currentFiles = payload.files;
+  renderFileList(currentFiles);
+  renderBoard(currentFiles);
+}
+
+function renderFileList(files) {
   fileList.innerHTML = "";
-  for (const file of payload.files) {
+  for (const file of files) {
     const item = document.createElement("li");
     item.textContent = file;
     fileList.appendChild(item);
+  }
+}
+
+function renderBoard(files) {
+  const grouped = Object.fromEntries(boardStatuses.map((status) => [status, []]));
+  for (const file of files) {
+    grouped[statusFromPath(file)].push(file);
+  }
+
+  boardGrid.innerHTML = "";
+  for (const status of boardStatuses) {
+    const column = document.createElement("section");
+    column.className = "board-column";
+
+    const heading = document.createElement("div");
+    heading.className = "board-column-header";
+    heading.innerHTML = `<span>${status}</span><strong>${grouped[status].length}</strong>`;
+    column.appendChild(heading);
+
+    const cards = document.createElement("div");
+    cards.className = "board-cards";
+    for (const file of grouped[status]) {
+      const card = document.createElement("article");
+      card.className = "board-card";
+
+      const title = document.createElement("h2");
+      title.textContent = titleFromPath(file);
+
+      const path = document.createElement("p");
+      path.textContent = file;
+
+      card.append(title, path);
+      cards.appendChild(card);
+    }
+    column.appendChild(cards);
+    boardGrid.appendChild(column);
+  }
+}
+
+function setView(view) {
+  const boardMode = view === "board";
+  document.querySelector(".workspace").classList.toggle("board-mode", boardMode);
+  boardPanel.hidden = !boardMode;
+  fileList.hidden = boardMode;
+  for (const button of viewButtons) {
+    button.classList.toggle("is-active", button.dataset.view === view);
   }
 }
 
@@ -49,6 +117,10 @@ async function runAction(action) {
 
 document.querySelectorAll("[data-action]").forEach((button) => {
   button.addEventListener("click", () => runAction(button.dataset.action));
+});
+
+viewButtons.forEach((button) => {
+  button.addEventListener("click", () => setView(button.dataset.view));
 });
 
 refreshFiles.addEventListener("click", refreshFileList);
