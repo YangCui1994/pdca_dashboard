@@ -3,25 +3,55 @@
   <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>全部事项 - Personal Workbench</title>
-    <link rel="stylesheet" href="/styles.css?v=pdca-pages">
+    <title>全部事项 - Quiet Workbench</title>
+    <link rel="stylesheet" href="/styles.css?v=quiet-workbench">
   </head>
   <body>
-    <main class="page-shell">
-      <header class="topbar">
+    <main class="quiet-shell">
+      <header class="quiet-topbar">
         <div>
+          <p class="eyebrow">Quiet Workbench</p>
           <h1>全部事项</h1>
           <p>按状态查看卡点、已有基础和最近事件。</p>
         </div>
-        <nav class="topbar-actions" aria-label="页面导航">
+        <nav class="topbar-actions segmented-actions" aria-label="页面导航">
           <a class="nav-button" href="/today.html">今日 PDCA</a>
           <button id="refreshItems" type="button">刷新</button>
         </nav>
       </header>
-      <section class="board-panel is-full">
-        <div class="board-grid" id="boardGrid"></div>
+
+      <section class="quiet-layout">
+        <aside class="quiet-sidebar" id="statusOverview"></aside>
+        <div class="quiet-main">
+          <section class="progress-card">
+            <div class="section-heading">
+              <div>
+                <p class="eyebrow">Vault Overview</p>
+                <h2>Today’s workbench is taking shape</h2>
+              </div>
+              <strong id="totalCount">0</strong>
+            </div>
+            <div class="progress-track"><div class="progress-fill" id="progressFill"></div></div>
+          </section>
+
+          <section class="callout-card" id="boardCallouts"></section>
+
+          <section class="badge-card">
+            <div class="section-heading">
+              <div>
+                <p class="eyebrow">Status</p>
+                <h2>当前任务分布</h2>
+              </div>
+            </div>
+            <div class="badges" id="vaultOverview"></div>
+          </section>
+
+          <section class="board-panel is-full">
+            <div class="board-grid" id="boardGrid"></div>
+          </section>
+        </div>
       </section>
     </main>
-    <script src="/app.js?v=pdca-pages"></script>
+    <script src="/app.js?v=quiet-workbench"></script>
   </body>
 </html>

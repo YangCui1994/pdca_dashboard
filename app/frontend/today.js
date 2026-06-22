@@ -5,6 +5,8 @@ const statusText = document.querySelector("#statusText");
 const savedPath = document.querySelector("#savedPath");
 const todayList = document.querySelector("#todayList");
 const refreshToday = document.querySelector("#refreshToday");
+const todayCount = document.querySelector("#todayCount");
+const todayProgress = document.querySelector("#todayProgress");
 
 function detailUrl(path) {
   return `/detail.html?path=${encodeURIComponent(path)}`;
@@ -28,7 +30,15 @@ async function refreshTodayList() {
   const response = await fetch("/api/work-items");
   const payload = await response.json();
   const items = (payload.items || []).filter((item) => item.status !== "archive" && isThisWeek(item.created));
+  renderTodayOverview(items);
   renderTodayList(items);
+}
+
+function renderTodayOverview(items) {
+  const doneCount = items.filter((item) => item.status === "done").length;
+  const ratio = items.length ? Math.round((doneCount / items.length) * 100) : 0;
+  todayCount.textContent = `${items.length} items`;
+  todayProgress.style.width = `${Math.max(ratio, items.length ? 8 : 0)}%`;
 }
 
 function renderTodayList(items) {
