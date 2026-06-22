@@ -1,0 +1,465 @@
+<!doctype html>
+<html lang="zh-CN" data-theme="light">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Stock PDCA · Agent Ops Compact</title>
+    <style>
+      :root {
+        --bg: #f5f6f7;
+        --canvas: #e9ecef;
+        --panel: #ffffff;
+        --soft: #f2f4f6;
+        --ink: #20232d;
+        --muted: #667083;
+        --line: #dbe0e7;
+        --orange: #d64b27;
+        --blue: #0d7bf2;
+        --green: #078f43;
+        --amber: #bc6900;
+        --red: #d94b5d;
+        --violet: #6a55d8;
+        --shadow: 0 24px 60px rgba(31, 36, 45, 0.08);
+        color-scheme: light;
+        font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+        font-size: 13px;
+      }
+
+      [data-theme="dark"] {
+        --bg: #15161a;
+        --canvas: #23262d;
+        --panel: #2c3038;
+        --soft: #242830;
+        --ink: #f4f6fb;
+        --muted: #a7afbd;
+        --line: #3b404a;
+        --orange: #ef7045;
+        --blue: #61a7ff;
+        --green: #39b875;
+        --amber: #df9442;
+        --red: #ec6f80;
+        --violet: #a493ff;
+        --shadow: 0 28px 70px rgba(0, 0, 0, 0.28);
+        color-scheme: dark;
+      }
+
+      * { box-sizing: border-box; }
+      body { margin: 0; min-height: 100vh; background: var(--bg); color: var(--ink); }
+      button, input, textarea { font: inherit; }
+      button { border: 0; cursor: pointer; }
+
+      .shell { padding: 20px; }
+      .app {
+        display: grid;
+        grid-template-columns: 230px minmax(620px, 1fr) 340px;
+        grid-template-rows: 1fr auto;
+        gap: 1px;
+        min-height: calc(100vh - 40px);
+        overflow: hidden;
+        border: 1px solid var(--line);
+        border-radius: 28px;
+        background: var(--canvas);
+        box-shadow: var(--shadow);
+      }
+
+      .pane { background: var(--panel); padding: 18px; overflow: auto; }
+      .brand, .topbar, .panel-head, .terminal-head, .source-row { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+      h1, h2, h3, p { margin-top: 0; }
+      .brand h1 { margin: 0; font-size: 17px; line-height: 1.2; }
+      .eyebrow { margin: 0 0 9px; color: var(--muted); font-size: 11px; font-weight: 780; letter-spacing: .05em; text-transform: uppercase; }
+      .topbar h1 { margin: 0 0 7px; font-size: 24px; line-height: 1.18; }
+      .topbar p { margin: 0; color: var(--muted); line-height: 1.45; max-width: 760px; }
+
+      .theme {
+        border-radius: 999px;
+        background: var(--soft);
+        color: var(--ink);
+        padding: 8px 11px;
+        font-weight: 720;
+      }
+
+      .segmented {
+        display: flex;
+        flex-shrink: 0;
+        overflow: hidden;
+        border-radius: 999px;
+        background: var(--canvas);
+      }
+
+      .segmented span { padding: 8px 13px; color: var(--muted); font-weight: 760; }
+      .segmented .active { background: var(--orange); color: #fff; }
+
+      .side-list { display: grid; gap: 9px; margin-top: 18px; }
+      .task-button {
+        width: 100%;
+        border-radius: 14px;
+        background: var(--soft);
+        color: var(--ink);
+        padding: 11px;
+        text-align: left;
+      }
+      .task-button.active { background: var(--ink); color: var(--panel); }
+      .task-button strong { display: block; font-size: 13px; line-height: 1.3; }
+      .task-button span { display: block; margin-top: 4px; color: var(--muted); font-size: 11px; line-height: 1.35; }
+      .task-button.active span { color: color-mix(in oklab, var(--panel) 70%, transparent); }
+
+      .compact-daily, .source-card {
+        display: grid;
+        gap: 8px;
+        margin-top: 18px;
+        border-radius: 18px;
+        background: var(--soft);
+        padding: 13px;
+      }
+      .mini-check { display: grid; grid-template-columns: auto 1fr; gap: 8px; align-items: center; color: var(--muted); font-size: 12px; line-height: 1.35; }
+      .source-row { color: var(--muted); font-size: 12px; }
+      .source-row strong { color: var(--ink); }
+
+      .main { display: grid; grid-template-rows: auto auto 1fr; gap: 14px; }
+      .status-strip { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; }
+      .metric {
+        border-radius: 18px;
+        background: var(--soft);
+        padding: 14px;
+      }
+      .metric span { color: var(--muted); font-size: 11px; }
+      .metric strong { display: block; margin-top: 6px; font-size: 22px; line-height: 1; }
+
+      .focus-grid { display: grid; grid-template-columns: 1.25fr 1fr 1fr; gap: 12px; }
+      .card {
+        border-radius: 20px;
+        background: var(--soft);
+        padding: 15px;
+        min-height: 235px;
+      }
+      .card h2 { margin-bottom: 12px; color: var(--muted); font-size: 11px; letter-spacing: .05em; text-transform: uppercase; }
+      .item { border-radius: 14px; background: var(--panel); padding: 11px; line-height: 1.38; }
+      .item + .item { margin-top: 9px; }
+      .item strong { display: block; margin-bottom: 4px; font-size: 13px; }
+      .item span { color: var(--muted); font-size: 11px; }
+      .done { border-left: 4px solid var(--green); }
+      .idea { border-left: 4px solid var(--blue); }
+      .blocker { border-left: 4px solid var(--red); }
+
+      .detail h2 { margin-bottom: 7px; font-size: 21px; line-height: 1.2; }
+      .detail p { color: var(--muted); line-height: 1.45; }
+      .detail-box {
+        border-radius: 18px;
+        background: var(--soft);
+        padding: 14px;
+        margin-bottom: 12px;
+      }
+      .detail-box strong { display: block; margin-bottom: 6px; }
+      .pill-row { display: flex; flex-wrap: wrap; gap: 8px; margin: 0 0 12px; }
+      .pill {
+        border-radius: 999px;
+        background: var(--soft);
+        color: var(--muted);
+        padding: 6px 9px;
+        font-size: 11px;
+        font-weight: 720;
+      }
+      .pill.hot { background: color-mix(in oklab, var(--orange) 16%, var(--soft)); color: var(--orange); }
+      .pill.blue { background: color-mix(in oklab, var(--blue) 14%, var(--soft)); color: var(--blue); }
+      .pill.violet { background: color-mix(in oklab, var(--violet) 14%, var(--soft)); color: var(--violet); }
+
+      .action {
+        width: 100%;
+        border-radius: 14px;
+        background: var(--orange);
+        color: white;
+        padding: 11px;
+        font-weight: 820;
+      }
+      .context-output {
+        width: 100%;
+        min-height: 225px;
+        border: 1px solid var(--line);
+        border-radius: 14px;
+        background: var(--panel);
+        color: var(--ink);
+        padding: 11px;
+        resize: vertical;
+        line-height: 1.42;
+      }
+
+      .terminal {
+        grid-column: 1 / -1;
+        border-top: 1px solid var(--line);
+        background: #1f232d;
+        color: #f5f7fb;
+        padding: 12px 16px 15px;
+      }
+      .terminal-head { margin-bottom: 9px; color: #aeb7c8; font-size: 12px; }
+      .terminal-row { display: grid; grid-template-columns: auto 1fr auto; gap: 9px; align-items: center; }
+      .prompt { color: #ef7045; font-weight: 850; }
+      .terminal input {
+        width: 100%;
+        border: 1px solid #3b4250;
+        border-radius: 11px;
+        background: #151820;
+        color: #f5f7fb;
+        padding: 10px 11px;
+      }
+      .terminal button {
+        border-radius: 11px;
+        background: #d64b27;
+        color: white;
+        padding: 10px 14px;
+        font-weight: 780;
+      }
+      .log { margin-top: 9px; color: #aeb7c8; font-size: 12px; }
+
+      @media (max-width: 1180px) {
+        .app { grid-template-columns: 1fr; }
+        .focus-grid, .status-strip { grid-template-columns: 1fr; }
+      }
+    </style>
+  </head>
+  <body>
+    <main class="shell">
+      <section class="app">
+        <aside class="pane">
+          <div class="brand">
+            <h1>Stock PDCA</h1>
+            <button class="theme" id="themeToggle">Dark</button>
+          </div>
+          <p class="eyebrow">Investment OS Tasks</p>
+          <div class="side-list" id="taskList"></div>
+
+          <section class="compact-daily">
+            <p class="eyebrow">Today Mini Loop</p>
+            <label class="mini-check"><input type="checkbox" checked> 市场日报已进入观察池</label>
+            <label class="mini-check"><input type="checkbox"> 为 1 个卡点指定下一步</label>
+            <label class="mini-check"><input type="checkbox"> 更新 1 条 Agent context</label>
+          </section>
+
+          <section class="source-card">
+            <p class="eyebrow">Source Snapshot</p>
+            <div class="source-row"><span>Market Daily</span><strong>2026-06-16</strong></div>
+            <div class="source-row"><span>Chen Scan</span><strong>光互连</strong></div>
+            <div class="source-row"><span>Framework</span><strong>IOS 6 stages</strong></div>
+          </section>
+        </aside>
+
+        <section class="pane main">
+          <header class="topbar">
+            <div>
+              <p class="eyebrow">B Style · Compact Console</p>
+              <h1>用交易体系项目试跑 PDCA Dashboard</h1>
+              <p>真实工作数据暂时不可用时，可以先用 stock 项目的市场日报、Chen scan、投资系统文档做上下文演练。主屏聚焦任务状态：完成项、相关 idea、关键卡点。</p>
+            </div>
+            <div class="segmented"><span class="active">Preview</span><span>Code</span></div>
+          </header>
+
+          <section class="status-strip">
+            <div class="metric"><span>Focus Done</span><strong id="doneCount">2</strong></div>
+            <div class="metric"><span>Active Tasks</span><strong>4</strong></div>
+            <div class="metric"><span>Ideas Linked</span><strong id="ideaCount">2</strong></div>
+            <div class="metric"><span>Blockers</span><strong id="blockerCount">2</strong></div>
+          </section>
+
+          <section class="focus-grid">
+            <div class="card">
+              <h2>重点完成项</h2>
+              <div id="doneItems"></div>
+            </div>
+            <div class="card">
+              <h2>相关 Idea</h2>
+              <div id="ideaItems"></div>
+            </div>
+            <div class="card">
+              <h2>关键卡点</h2>
+              <div id="blockerItems"></div>
+            </div>
+          </section>
+        </section>
+
+        <aside class="pane detail">
+          <p class="eyebrow">Selected Task</p>
+          <h2 id="selectedTitle"></h2>
+          <div class="pill-row" id="selectedTags"></div>
+          <p id="selectedMeta"></p>
+          <div class="detail-box">
+            <strong>PDCA 摘要</strong>
+            <p id="selectedSummary"></p>
+          </div>
+          <div class="detail-box">
+            <strong>下一步</strong>
+            <p id="selectedNext"></p>
+          </div>
+          <button class="action" id="readContext">读取 Agent Context</button>
+          <br><br>
+          <textarea class="context-output" id="contextOutput" readonly></textarea>
+        </aside>
+
+        <section class="terminal">
+          <div class="terminal-head">
+            <span>Workbench Terminal</span>
+            <span>示例：done 已生成市场日报 / idea 加 stale-data 检测 / blocker Breadth 数据缺失</span>
+          </div>
+          <div class="terminal-row">
+            <span class="prompt">pdca&gt;</span>
+            <input id="terminalInput" placeholder="输入 done / idea / blocker 开头的内容，会分发到当前交易任务">
+            <button id="sendCommand">分发</button>
+          </div>
+          <div class="log" id="terminalLog">等待输入。</div>
+        </section>
+      </section>
+    </main>
+
+    <script>
+      const tasks = [
+        {
+          title: "市场日报生产链路",
+          meta: "来源：outputs/market/daily/2026-06-16.md · /market-daily",
+          tags: ["Plan", "Daily", "Market"],
+          summary: "用每日市场报告作为 PDCA 输入：记录市场情绪、指数结构、watchlist 异动、异常期权流和赛道触发提示。",
+          next: "把报告中的 Action Matrix 和赛道触发提示转成可追踪任务，例如 sector-check、候选股研究、等待触发。",
+          done: ["2026-06-16 市场日报已生成", "提炼出科技获利了结、价值防御轮动、AMKR 候选三个状态信号"],
+          ideas: ["将 Action Matrix 映射为自动任务模板", "把 Fear & Greed、VIX、50MA 做成状态徽章"],
+          blockers: ["Breadth 与 HY 信用利差数据缺失", "异常期权流中 OI=1 噪声需要降权规则"]
+        },
+        {
+          title: "Chen Scan 光互连复盘",
+          meta: "来源：outputs/chen-scan/2026-06-15-optical.md · /chen-scan 光互连",
+          tags: ["Do", "Research", "Optical"],
+          summary: "光互连 scan 给出 CRDO、COHR、AAOI 等候选，并判断赛道处于中后期扩张。适合测试任务详情页和 context 读取。",
+          next: "把 CRDO / COHR 的下一步研究动作拆成独立任务，同时把 OCC / LWLG 的等待条件写成 watch trigger。",
+          done: ["综合排名和 Stage 1/2/3 评估已完整输出", "CRDO 与 COHR 被标记为优先研究对象"],
+          ideas: ["为每个 ticker 建一个 PDCA 子任务文件夹", "把等待条件转成可执行 trigger，例如 MA50 回踩或 EPS 转正"],
+          blockers: ["部分公司 backlog 信息不完整", "小市值翻倍窗口和大市值追涨逻辑需要分开口径"]
+        },
+        {
+          title: "Investment OS 框架落地",
+          meta: "来源：docs/investment-os.md · 六阶段投资系统",
+          tags: ["Check", "Framework", "IOS"],
+          summary: "IOS 文档定义了 idea generation、fundamental research、technical confirmation、portfolio allocation、execution、position management 六个阶段。",
+          next: "把六阶段映射成任务生命周期字段，先服务单 Agent 读取上下文，Round Table 后续再接。",
+          done: ["识别出 BAIT、Moneyball PW EV、Asset Type、Chen Yun Method、SEPA 等核心框架", "确认 command inventory 可作为任务类型来源"],
+          ideas: ["任务详情页增加 framework checklist", "把 /stock-analyze、/morning-check、/market-daily 映射为任务 action"],
+          blockers: ["框架信息很长，主页面只应保留状态摘要", "需要定义哪些字段写入 task status，哪些保存在 context 文档"]
+        },
+        {
+          title: "Finance Skills 集成收尾",
+          meta: "来源：task_plan.md · finance-skills-integration",
+          tags: ["Act", "Tooling", "Skills"],
+          summary: "task_plan 显示 finance-skills integration 的读文件和编辑阶段完成，commit 阶段仍 in_progress。",
+          next: "把未完成 commit 作为项目治理卡点记录；如果主线要接 GitHub，再进入独立 Git 流程。",
+          done: ["stock-entry、stock-exit、etf-check、etf-analyze 的集成计划已列清", "Phase 1 与 Phase 2 已完成"],
+          ideas: ["PDCA 可以自动识别 task_plan 中的 complete / in_progress", "把 commit 阶段作为 Act 状态单独呈现"],
+          blockers: ["Git 状态需要在 stock 项目内确认，当前 demo 不应直接修改外部项目", "跨项目读取时需要权限和路径策略"]
+        }
+      ];
+
+      let selected = tasks[0];
+
+      function renderTasks() {
+        const list = document.querySelector("#taskList");
+        list.innerHTML = "";
+        tasks.forEach((task) => {
+          const button = document.createElement("button");
+          button.className = `task-button ${task === selected ? "active" : ""}`;
+          button.innerHTML = `<strong>${task.title}</strong><span>${task.meta}</span>`;
+          button.addEventListener("click", () => {
+            selected = task;
+            render();
+          });
+          list.appendChild(button);
+        });
+      }
+
+      function renderTags() {
+        const box = document.querySelector("#selectedTags");
+        box.innerHTML = "";
+        selected.tags.forEach((tag, index) => {
+          const pill = document.createElement("span");
+          pill.className = `pill ${index === 0 ? "hot" : index === 1 ? "blue" : "violet"}`;
+          pill.textContent = tag;
+          box.appendChild(pill);
+        });
+      }
+
+      function renderGroup(id, items, kind) {
+        const box = document.querySelector(id);
+        box.innerHTML = "";
+        const source = items.length ? items : ["暂无，等待 terminal 输入"];
+        source.forEach((text) => {
+          const item = document.createElement("div");
+          item.className = `item ${kind}`;
+          item.innerHTML = `<strong>${text}</strong><span>${selected.title}</span>`;
+          box.appendChild(item);
+        });
+      }
+
+      function render() {
+        renderTasks();
+        renderTags();
+        document.querySelector("#selectedTitle").textContent = selected.title;
+        document.querySelector("#selectedMeta").textContent = selected.meta;
+        document.querySelector("#selectedSummary").textContent = selected.summary;
+        document.querySelector("#selectedNext").textContent = selected.next;
+        renderGroup("#doneItems", selected.done, "done");
+        renderGroup("#ideaItems", selected.ideas, "idea");
+        renderGroup("#blockerItems", selected.blockers, "blocker");
+        document.querySelector("#doneCount").textContent = selected.done.length;
+        document.querySelector("#ideaCount").textContent = selected.ideas.length;
+        document.querySelector("#blockerCount").textContent = selected.blockers.length;
+      }
+
+      function dispatchCommand() {
+        const input = document.querySelector("#terminalInput");
+        const text = input.value.trim();
+        if (!text) return;
+        if (text.startsWith("done ")) {
+          selected.done.push(text.replace("done ", ""));
+          document.querySelector("#terminalLog").textContent = `已写入重点完成项：${selected.title}`;
+        } else if (text.startsWith("idea ")) {
+          selected.ideas.push(text.replace("idea ", ""));
+          document.querySelector("#terminalLog").textContent = `已关联 idea：${selected.title}`;
+        } else if (text.startsWith("blocker ")) {
+          selected.blockers.push(text.replace("blocker ", ""));
+          document.querySelector("#terminalLog").textContent = `已记录关键卡点：${selected.title}`;
+        } else {
+          selected.ideas.push(text);
+          document.querySelector("#terminalLog").textContent = "未识别前缀，默认作为相关 idea 分发。";
+        }
+        input.value = "";
+        render();
+      }
+
+      document.querySelector("#sendCommand").addEventListener("click", dispatchCommand);
+      document.querySelector("#terminalInput").addEventListener("keydown", (event) => {
+        if (event.key === "Enter") dispatchCommand();
+      });
+      document.querySelector("#readContext").addEventListener("click", () => {
+        document.querySelector("#contextOutput").value = `# Agent Task Context
+
+Task: ${selected.title}
+Meta: ${selected.meta}
+Tags: ${selected.tags.join(", ")}
+
+## PDCA Summary
+${selected.summary}
+
+## Next Step
+${selected.next}
+
+## Focus Done
+${selected.done.map((item) => `- ${item}`).join("\\n") || "- None"}
+
+## Related Ideas
+${selected.ideas.map((item) => `- ${item}`).join("\\n") || "- None"}
+
+## Key Blockers
+${selected.blockers.map((item) => `- ${item}`).join("\\n") || "- None"}`;
+      });
+      document.querySelector("#themeToggle").addEventListener("click", () => {
+        const root = document.documentElement;
+        root.dataset.theme = root.dataset.theme === "dark" ? "light" : "dark";
+        document.querySelector("#themeToggle").textContent = root.dataset.theme === "dark" ? "Light" : "Dark";
+      });
+      render();
+    </script>
+  </body>
+</html>

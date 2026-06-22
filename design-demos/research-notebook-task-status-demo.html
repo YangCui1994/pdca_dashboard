@@ -1,0 +1,344 @@
+<!doctype html>
+<html lang="zh-CN" data-theme="light">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Research Notebook · Task Status Focus</title>
+    <style>
+      :root {
+        --bg: #f7f4ed;
+        --desk: #e9e3d7;
+        --paper: #fffdf8;
+        --soft: #f8f3e8;
+        --ink: #27231d;
+        --muted: #766d5f;
+        --line: #ded4c4;
+        --accent: #c66d22;
+        --green: #0b7b48;
+        --blue: #286fba;
+        --red: #a84731;
+        --shadow: 0 24px 70px rgba(75, 55, 30, 0.13);
+        color-scheme: light;
+        font-family: ui-serif, "New York", "Iowan Old Style", "Source Han Serif SC", "Songti SC", serif;
+      }
+
+      [data-theme="dark"] {
+        --bg: #171512;
+        --desk: #242019;
+        --paper: #2d2922;
+        --soft: #252119;
+        --ink: #f4ead8;
+        --muted: #b8aa94;
+        --line: #4b4234;
+        --accent: #dc8a43;
+        --green: #55bd83;
+        --blue: #73a7dd;
+        --red: #e37d64;
+        --shadow: 0 30px 80px rgba(0, 0, 0, 0.28);
+        color-scheme: dark;
+      }
+
+      * { box-sizing: border-box; }
+      body { margin: 0; min-height: 100vh; background: var(--bg); color: var(--ink); }
+      button, input, textarea { font: inherit; }
+
+      .shell { padding: 24px; }
+      .book {
+        display: grid;
+        grid-template-columns: 240px minmax(620px, 1fr) 340px;
+        grid-template-rows: 1fr auto;
+        gap: 1px;
+        overflow: hidden;
+        min-height: calc(100vh - 48px);
+        border: 1px solid var(--line);
+        border-radius: 30px;
+        background: var(--desk);
+        box-shadow: var(--shadow);
+      }
+
+      .pane { background: var(--paper); padding: 22px; overflow: auto; }
+      h1, h2, h3, p { margin-top: 0; }
+      .top, .book-title, .terminal-head { display: flex; align-items: center; justify-content: space-between; gap: 16px; }
+      .book-title h1 { margin: 0; font-size: 22px; }
+      .eyebrow {
+        margin: 0 0 10px;
+        color: var(--muted);
+        font-family: Inter, ui-sans-serif, system-ui, sans-serif;
+        font-size: 12px;
+        font-weight: 800;
+        letter-spacing: .05em;
+        text-transform: uppercase;
+      }
+
+      .theme, .folder, .small, .primary { border: 0; cursor: pointer; }
+      .theme { border-radius: 999px; background: var(--soft); color: var(--ink); padding: 9px 12px; }
+      .folder-list { display: grid; gap: 9px; margin-top: 24px; }
+      .folder {
+        border-radius: 14px;
+        background: transparent;
+        color: var(--ink);
+        padding: 11px 12px;
+        text-align: left;
+      }
+      .folder.active { background: var(--soft); font-weight: 780; }
+      .folder span { display: block; margin-top: 4px; color: var(--muted); font-size: 12px; }
+
+      .mini-daily {
+        display: grid;
+        gap: 8px;
+        margin-top: 22px;
+        border: 1px solid var(--line);
+        border-radius: 20px;
+        background: var(--soft);
+        padding: 14px;
+      }
+      .mini-daily label { display: grid; grid-template-columns: auto 1fr; gap: 8px; align-items: center; color: var(--muted); font-size: 13px; }
+
+      .top h1 { margin: 0 0 8px; font-size: 35px; }
+      .top p { margin: 0; max-width: 720px; color: var(--muted); line-height: 1.55; }
+      .segmented {
+        display: flex;
+        overflow: hidden;
+        border-radius: 999px;
+        background: var(--soft);
+        font-family: Inter, ui-sans-serif, system-ui, sans-serif;
+      }
+      .segmented span { padding: 10px 16px; color: var(--muted); font-weight: 750; }
+      .segmented .active { background: var(--accent); color: #fff; }
+
+      .status-map {
+        display: grid;
+        grid-template-columns: 1fr 1fr 1fr;
+        gap: 14px;
+        margin-top: 18px;
+      }
+      .paper-card {
+        border: 1px solid var(--line);
+        border-radius: 24px;
+        background: var(--soft);
+        padding: 18px;
+        min-height: 250px;
+      }
+      .paper-card h2 { margin-bottom: 13px; color: var(--muted); font-family: Inter, ui-sans-serif, system-ui, sans-serif; font-size: 12px; letter-spacing: .05em; text-transform: uppercase; }
+      .note {
+        border-radius: 16px;
+        background: var(--paper);
+        padding: 12px;
+        line-height: 1.45;
+      }
+      .note + .note { margin-top: 10px; }
+      .note strong { display: block; margin-bottom: 5px; }
+      .note span { color: var(--muted); font-size: 13px; }
+      .complete { border-left: 5px solid var(--green); }
+      .idea { border-left: 5px solid var(--blue); }
+      .blocker { border-left: 5px solid var(--red); }
+
+      .selected-card, .agent-card {
+        border: 1px solid var(--line);
+        border-radius: 24px;
+        background: var(--soft);
+        padding: 18px;
+        margin-bottom: 14px;
+      }
+      .selected-card h2 { margin-bottom: 8px; font-size: 24px; }
+      .selected-card p { color: var(--muted); line-height: 1.5; }
+      .badge-row { display: flex; flex-wrap: wrap; gap: 8px; }
+      .badge { border-radius: 999px; background: var(--paper); color: var(--muted); padding: 8px 10px; font-family: Inter, ui-sans-serif, system-ui, sans-serif; font-size: 12px; font-weight: 740; }
+      .primary { width: 100%; border-radius: 16px; background: var(--ink); color: var(--paper); padding: 13px; font-family: Inter, ui-sans-serif, system-ui, sans-serif; font-weight: 820; }
+      .agent-output { width: 100%; min-height: 240px; border: 1px solid var(--line); border-radius: 18px; background: var(--paper); color: var(--ink); padding: 14px; line-height: 1.5; resize: vertical; }
+
+      .terminal {
+        grid-column: 1 / -1;
+        border-top: 1px solid var(--line);
+        background: #211d17;
+        color: #f8efe0;
+        padding: 14px 18px 18px;
+      }
+      .terminal-head { margin-bottom: 10px; color: #cbbda8; font-family: Inter, ui-sans-serif, system-ui, sans-serif; font-size: 13px; }
+      .terminal-row { display: grid; grid-template-columns: auto 1fr auto; gap: 10px; align-items: center; }
+      .prompt { color: #dc8a43; font-weight: 850; }
+      .terminal input { width: 100%; border: 1px solid #514536; border-radius: 12px; background: #15120e; color: #f8efe0; padding: 12px; }
+      .terminal button { border: 0; border-radius: 12px; background: #c66d22; color: #fff; cursor: pointer; padding: 12px 16px; font-weight: 780; }
+      .log { margin-top: 10px; color: #cbbda8; font-family: Inter, ui-sans-serif, system-ui, sans-serif; font-size: 13px; }
+
+      @media (max-width: 1180px) {
+        .book, .status-map { grid-template-columns: 1fr; }
+      }
+    </style>
+  </head>
+  <body>
+    <main class="shell">
+      <section class="book">
+        <aside class="pane">
+          <div class="book-title">
+            <h1>Daily Book</h1>
+            <button class="theme" id="themeToggle">Dark</button>
+          </div>
+          <p class="eyebrow">Task Folders</p>
+          <div class="folder-list" id="folderList"></div>
+          <section class="mini-daily">
+            <p class="eyebrow">Daily Sheet · Small</p>
+            <label><input type="checkbox" checked> 记录一个完成事实</label>
+            <label><input type="checkbox"> 明确一个关键卡点</label>
+            <label><input type="checkbox"> 把一个 idea 归档到任务</label>
+          </section>
+        </aside>
+
+        <section class="pane">
+          <header class="top">
+            <div>
+              <p class="eyebrow">Task Status Notebook</p>
+              <h1>每日页面更像状态索引，而不是待办清单</h1>
+              <p>主区域展示任务的完成事实、相关 idea、关键卡点。底部 terminal 承担输入和自动分发，Daily Sheet 只保留极小面积。</p>
+            </div>
+            <div class="segmented"><span class="active">Notes</span><span>Files</span></div>
+          </header>
+
+          <section class="status-map">
+            <article class="paper-card">
+              <h2>重点完成项</h2>
+              <div id="completeNotes"></div>
+            </article>
+            <article class="paper-card">
+              <h2>相关 Idea</h2>
+              <div id="ideaNotes"></div>
+            </article>
+            <article class="paper-card">
+              <h2>关键卡点</h2>
+              <div id="blockerNotes"></div>
+            </article>
+          </section>
+        </section>
+
+        <aside class="pane">
+          <section class="selected-card">
+            <p class="eyebrow">Selected Dossier</p>
+            <h2 id="selectedTitle"></h2>
+            <p id="selectedMeta"></p>
+            <div class="badge-row">
+              <span class="badge">task.md</span>
+              <span class="badge">context.md</span>
+              <span class="badge">ai-notes.md</span>
+              <span class="badge">assets</span>
+            </div>
+          </section>
+          <section class="agent-card">
+            <p class="eyebrow">Agent Preview</p>
+            <button class="primary" id="readContext">读取任务上下文</button>
+          </section>
+          <textarea class="agent-output" id="agentOutput" readonly></textarea>
+        </aside>
+
+        <section class="terminal">
+          <div class="terminal-head">
+            <span>Notebook Terminal</span>
+            <span>输入示例：完成 已发出反馈 / idea 复用为数据异常模板 / 卡点 等平台截图</span>
+          </div>
+          <div class="terminal-row">
+            <span class="prompt">daily.md&gt;</span>
+            <input id="terminalInput" placeholder="直接输入，系统按语义分发到当前任务">
+            <button id="sendCommand">写入</button>
+          </div>
+          <div class="log" id="terminalLog">等待写入。</div>
+        </section>
+      </section>
+    </main>
+
+    <script>
+      const folders = [
+        { title: "炉温跳变口径核实", meta: "data-issue · context ready", complete: ["确认平台清洗逻辑没有变化"], ideas: ["形成字段口径 checklist"], blockers: ["缺上游字段映射截图"] },
+        { title: "领导反馈草稿整理", meta: "communication-draft · active", complete: ["写出事实/判断/下一步结构"], ideas: ["反馈模板做成 reusable prompt"], blockers: ["等待最终结论"] },
+        { title: "Agent Context 读取边界", meta: "architecture · design", complete: [], ideas: ["terminal 输入可以自动追加到 context.md"], blockers: ["需要定义状态同步规则"] }
+      ];
+      let selected = folders[0];
+
+      function renderFolders() {
+        const list = document.querySelector("#folderList");
+        list.innerHTML = "";
+        folders.forEach((folder) => {
+          const button = document.createElement("button");
+          button.className = `folder ${folder === selected ? "active" : ""}`;
+          button.innerHTML = `${folder.title}<span>${folder.meta}</span>`;
+          button.addEventListener("click", () => {
+            selected = folder;
+            render();
+          });
+          list.appendChild(button);
+        });
+      }
+
+      function renderColumn(selector, items, className) {
+        const box = document.querySelector(selector);
+        box.innerHTML = "";
+        (items.length ? items : ["暂无，等待 terminal 写入"]).forEach((text) => {
+          const node = document.createElement("div");
+          node.className = `note ${className}`;
+          node.innerHTML = `<strong>${text}</strong><span>${selected.title}</span>`;
+          box.appendChild(node);
+        });
+      }
+
+      function render() {
+        renderFolders();
+        document.querySelector("#selectedTitle").textContent = selected.title;
+        document.querySelector("#selectedMeta").textContent = selected.meta;
+        renderColumn("#completeNotes", selected.complete, "complete");
+        renderColumn("#ideaNotes", selected.ideas, "idea");
+        renderColumn("#blockerNotes", selected.blockers, "blocker");
+      }
+
+      function dispatch() {
+        const input = document.querySelector("#terminalInput");
+        const text = input.value.trim();
+        if (!text) return;
+        if (text.startsWith("完成 ")) {
+          selected.complete.push(text.replace("完成 ", ""));
+          document.querySelector("#terminalLog").textContent = "已写入重点完成项。";
+        } else if (text.startsWith("idea ")) {
+          selected.ideas.push(text.replace("idea ", ""));
+          document.querySelector("#terminalLog").textContent = "已写入相关 idea。";
+        } else if (text.startsWith("卡点 ")) {
+          selected.blockers.push(text.replace("卡点 ", ""));
+          document.querySelector("#terminalLog").textContent = "已写入关键卡点。";
+        } else {
+          selected.ideas.push(text);
+          document.querySelector("#terminalLog").textContent = "未识别前缀，默认写入相关 idea。";
+        }
+        input.value = "";
+        render();
+      }
+
+      document.querySelector("#sendCommand").addEventListener("click", dispatch);
+      document.querySelector("#terminalInput").addEventListener("keydown", (event) => {
+        if (event.key === "Enter") dispatch();
+      });
+      document.querySelector("#readContext").addEventListener("click", () => {
+        document.querySelector("#agentOutput").value = `# Agent Task Context
+
+Task: ${selected.title}
+Meta: ${selected.meta}
+
+## 重点完成项
+${selected.complete.map((item) => `- ${item}`).join("\\n") || "- None"}
+
+## 相关 Idea
+${selected.ideas.map((item) => `- ${item}`).join("\\n") || "- None"}
+
+## 关键卡点
+${selected.blockers.map((item) => `- ${item}`).join("\\n") || "- None"}
+
+## Files
+- task.md
+- context.md
+- ai-notes.md
+- assets/`;
+      });
+      document.querySelector("#themeToggle").addEventListener("click", () => {
+        const root = document.documentElement;
+        root.dataset.theme = root.dataset.theme === "dark" ? "light" : "dark";
+        document.querySelector("#themeToggle").textContent = root.dataset.theme === "dark" ? "Light" : "Dark";
+      });
+      render();
+    </script>
+  </body>
+</html>

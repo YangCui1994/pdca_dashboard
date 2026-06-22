@@ -1,0 +1,401 @@
+<!doctype html>
+<html lang="zh-CN" data-theme="light">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Agent Ops · Task Status Focus</title>
+    <style>
+      :root {
+        --bg: #f6f7f7;
+        --canvas: #eceef1;
+        --panel: #ffffff;
+        --soft: #f5f6f8;
+        --ink: #20232d;
+        --muted: #687080;
+        --line: #dde1e7;
+        --orange: #d64b27;
+        --blue: #0d7bf2;
+        --green: #078f43;
+        --amber: #be6900;
+        --red: #d94b5d;
+        --shadow: 0 24px 60px rgba(33, 37, 45, 0.08);
+        color-scheme: light;
+        font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      }
+
+      [data-theme="dark"] {
+        --bg: #15161a;
+        --canvas: #23262d;
+        --panel: #2d3038;
+        --soft: #24272f;
+        --ink: #f4f6fb;
+        --muted: #a7afbd;
+        --line: #3b404a;
+        --orange: #ef7045;
+        --blue: #61a7ff;
+        --green: #39b875;
+        --amber: #df9442;
+        --red: #ec6f80;
+        --shadow: 0 28px 70px rgba(0, 0, 0, 0.28);
+        color-scheme: dark;
+      }
+
+      * { box-sizing: border-box; }
+      body { margin: 0; min-height: 100vh; background: var(--bg); color: var(--ink); }
+      button, input, textarea { font: inherit; }
+
+      .shell { padding: 24px; }
+      .app {
+        display: grid;
+        grid-template-columns: 240px minmax(620px, 1fr) 360px;
+        grid-template-rows: 1fr auto;
+        gap: 1px;
+        overflow: hidden;
+        min-height: calc(100vh - 48px);
+        border: 1px solid var(--line);
+        border-radius: 32px;
+        background: var(--canvas);
+        box-shadow: var(--shadow);
+      }
+
+      .pane { background: var(--panel); padding: 22px; overflow: auto; }
+      .brand, .topbar, .panel-head, .terminal-head { display: flex; align-items: center; justify-content: space-between; gap: 14px; }
+      h1, h2, h3, p { margin-top: 0; }
+      .brand h1 { margin: 0; font-size: 19px; }
+      .eyebrow { margin: 0 0 10px; color: var(--muted); font-size: 12px; font-weight: 780; letter-spacing: .05em; text-transform: uppercase; }
+      .topbar h1 { margin: 0 0 8px; font-size: 29px; }
+      .topbar p { margin: 0; color: var(--muted); line-height: 1.5; }
+
+      .theme, .chip, .action, .task-button {
+        border: 0;
+        cursor: pointer;
+      }
+
+      .theme {
+        border-radius: 999px;
+        background: var(--soft);
+        color: var(--ink);
+        padding: 9px 12px;
+      }
+
+      .segmented {
+        display: flex;
+        overflow: hidden;
+        border-radius: 999px;
+        background: var(--canvas);
+      }
+
+      .segmented span { padding: 10px 16px; color: var(--muted); font-weight: 720; }
+      .segmented .active { background: var(--orange); color: white; }
+
+      .side-list { display: grid; gap: 10px; margin-top: 22px; }
+      .task-button {
+        border-radius: 16px;
+        background: var(--soft);
+        color: var(--ink);
+        padding: 13px;
+        text-align: left;
+      }
+      .task-button.active { background: var(--ink); color: var(--panel); }
+      .task-button span { display: block; margin-top: 4px; color: var(--muted); font-size: 12px; }
+      .task-button.active span { color: color-mix(in oklab, var(--panel) 70%, transparent); }
+
+      .compact-daily {
+        display: grid;
+        gap: 8px;
+        margin-top: 22px;
+        border-radius: 20px;
+        background: var(--soft);
+        padding: 14px;
+      }
+      .mini-check { display: grid; grid-template-columns: auto 1fr; gap: 8px; align-items: center; color: var(--muted); font-size: 13px; }
+
+      .main { display: grid; grid-template-rows: auto auto 1fr; gap: 16px; }
+      .status-strip { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; }
+      .metric {
+        border-radius: 22px;
+        background: var(--soft);
+        padding: 16px;
+      }
+      .metric span { color: var(--muted); font-size: 12px; }
+      .metric strong { display: block; margin-top: 7px; font-size: 27px; }
+
+      .focus-grid { display: grid; grid-template-columns: 1.2fr 1fr 1fr; gap: 14px; }
+      .card {
+        border-radius: 24px;
+        background: var(--soft);
+        padding: 18px;
+        min-height: 220px;
+      }
+      .card h2 { margin-bottom: 14px; color: var(--muted); font-size: 12px; letter-spacing: .05em; text-transform: uppercase; }
+      .item { border-radius: 16px; background: var(--panel); padding: 12px; line-height: 1.4; }
+      .item + .item { margin-top: 10px; }
+      .item strong { display: block; margin-bottom: 4px; }
+      .item span { color: var(--muted); font-size: 12px; }
+      .done { border-left: 5px solid var(--green); }
+      .idea { border-left: 5px solid var(--blue); }
+      .blocker { border-left: 5px solid var(--red); }
+
+      .detail h2 { margin-bottom: 8px; font-size: 24px; }
+      .detail p { color: var(--muted); line-height: 1.5; }
+      .detail-box {
+        border-radius: 20px;
+        background: var(--soft);
+        padding: 16px;
+        margin-bottom: 14px;
+      }
+      .action {
+        width: 100%;
+        border-radius: 16px;
+        background: var(--orange);
+        color: white;
+        padding: 13px;
+        font-weight: 820;
+      }
+      .context-output {
+        width: 100%;
+        min-height: 230px;
+        border: 1px solid var(--line);
+        border-radius: 16px;
+        background: var(--panel);
+        color: var(--ink);
+        padding: 12px;
+        resize: vertical;
+        line-height: 1.45;
+      }
+
+      .terminal {
+        grid-column: 1 / -1;
+        border-top: 1px solid var(--line);
+        background: #1f232d;
+        color: #f5f7fb;
+        padding: 14px 18px 18px;
+      }
+      .terminal-head { margin-bottom: 10px; color: #aeb7c8; font-size: 13px; }
+      .terminal-row { display: grid; grid-template-columns: auto 1fr auto; gap: 10px; align-items: center; }
+      .prompt { color: #ef7045; font-weight: 850; }
+      .terminal input {
+        width: 100%;
+        border: 1px solid #3b4250;
+        border-radius: 12px;
+        background: #151820;
+        color: #f5f7fb;
+        padding: 12px;
+      }
+      .terminal button {
+        border: 0;
+        border-radius: 12px;
+        background: #d64b27;
+        color: white;
+        cursor: pointer;
+        padding: 12px 16px;
+        font-weight: 780;
+      }
+      .log { margin-top: 10px; color: #aeb7c8; font-size: 13px; }
+
+      @media (max-width: 1180px) {
+        .app, .focus-grid, .status-strip { grid-template-columns: 1fr; }
+      }
+    </style>
+  </head>
+  <body>
+    <main class="shell">
+      <section class="app">
+        <aside class="pane">
+          <div class="brand">
+            <h1>Agent Ops</h1>
+            <button class="theme" id="themeToggle">Dark</button>
+          </div>
+          <p class="eyebrow">Task State</p>
+          <div class="side-list" id="taskList"></div>
+          <section class="compact-daily">
+            <p class="eyebrow">Daily Mini List</p>
+            <label class="mini-check"><input type="checkbox" checked> 已确认 1 个重点完成项</label>
+            <label class="mini-check"><input type="checkbox"> 写明 1 个关键卡点</label>
+            <label class="mini-check"><input type="checkbox"> 提炼 1 条相关 idea</label>
+          </section>
+        </aside>
+
+        <section class="pane main">
+          <header class="topbar">
+            <div>
+              <p class="eyebrow">Daily Status Console</p>
+              <h1>今天重点看任务状态，不看长清单</h1>
+              <p>每日清单缩成左侧小模块，主屏展示重点完成项、相关 idea、关键卡点，以及可直接分发输入的 terminal。</p>
+            </div>
+            <div class="segmented"><span class="active">Preview</span><span>Code</span></div>
+          </header>
+
+          <section class="status-strip">
+            <div class="metric"><span>Focus Done</span><strong id="doneCount">1</strong></div>
+            <div class="metric"><span>Active</span><strong>4</strong></div>
+            <div class="metric"><span>Ideas Linked</span><strong id="ideaCount">2</strong></div>
+            <div class="metric"><span>Blockers</span><strong id="blockerCount">2</strong></div>
+          </section>
+
+          <section class="focus-grid">
+            <div class="card">
+              <h2>重点完成项</h2>
+              <div id="doneItems"></div>
+            </div>
+            <div class="card">
+              <h2>相关 Idea</h2>
+              <div id="ideaItems"></div>
+            </div>
+            <div class="card">
+              <h2>关键卡点</h2>
+              <div id="blockerItems"></div>
+            </div>
+          </section>
+        </section>
+
+        <aside class="pane detail">
+          <p class="eyebrow">Selected Task</p>
+          <h2 id="selectedTitle"></h2>
+          <p id="selectedMeta"></p>
+          <div class="detail-box">
+            <strong>状态摘要</strong>
+            <p id="selectedSummary"></p>
+          </div>
+          <button class="action" id="readContext">读取 Agent Context</button>
+          <br><br>
+          <textarea class="context-output" id="contextOutput" readonly></textarea>
+        </aside>
+
+        <section class="terminal">
+          <div class="terminal-head">
+            <span>Workbench Terminal</span>
+            <span>输入示例：done 炉温已确认 / idea 建一个字段口径模板 / blocker 等平台反馈</span>
+          </div>
+          <div class="terminal-row">
+            <span class="prompt">pdca&gt;</span>
+            <input id="terminalInput" placeholder="直接输入，会自动分发到当前任务的完成项、idea 或卡点">
+            <button id="sendCommand">分发</button>
+          </div>
+          <div class="log" id="terminalLog">等待输入。</div>
+        </section>
+      </section>
+    </main>
+
+    <script>
+      const tasks = [
+        {
+          title: "炉温跳变口径核实",
+          meta: "data-issue · active · agent-ready",
+          summary: "今天最重要的是确认平台清洗逻辑是否变化，并把结论写进领导反馈。",
+          done: ["已确认平台清洗逻辑没有变化"],
+          ideas: ["把字段口径差异沉淀为 checklist", "异常排查模板可以复用到压力数据"],
+          blockers: ["还缺上游字段映射截图", "平台同事回复时间不确定"]
+        },
+        {
+          title: "领导反馈草稿整理",
+          meta: "communication-draft · active",
+          summary: "需要把数据结论转成低摩擦、可发送的反馈语言。",
+          done: ["已有第一版反馈结构"],
+          ideas: ["保留事实/判断/下一步三段式"],
+          blockers: ["缺最终确认口径"]
+        },
+        {
+          title: "Agent Context 读取边界",
+          meta: "architecture · design",
+          summary: "做到 single-agent 读取上下文即可，Round Table 在下一阶段停住。",
+          done: [],
+          ideas: ["每日 terminal 可以直接追加到 context.md"],
+          blockers: ["需要定义哪些输入会改 task 状态"]
+        }
+      ];
+
+      let selected = tasks[0];
+
+      function renderTasks() {
+        const list = document.querySelector("#taskList");
+        list.innerHTML = "";
+        tasks.forEach((task) => {
+          const button = document.createElement("button");
+          button.className = `task-button ${task === selected ? "active" : ""}`;
+          button.innerHTML = `${task.title}<span>${task.meta}</span>`;
+          button.addEventListener("click", () => {
+            selected = task;
+            render();
+          });
+          list.appendChild(button);
+        });
+      }
+
+      function renderGroup(id, items, kind) {
+        const box = document.querySelector(id);
+        box.innerHTML = "";
+        const source = items.length ? items : ["暂无，等待 terminal 输入"];
+        source.forEach((text) => {
+          const item = document.createElement("div");
+          item.className = `item ${kind}`;
+          item.innerHTML = `<strong>${text}</strong><span>${selected.title}</span>`;
+          box.appendChild(item);
+        });
+      }
+
+      function render() {
+        renderTasks();
+        document.querySelector("#selectedTitle").textContent = selected.title;
+        document.querySelector("#selectedMeta").textContent = selected.meta;
+        document.querySelector("#selectedSummary").textContent = selected.summary;
+        renderGroup("#doneItems", selected.done, "done");
+        renderGroup("#ideaItems", selected.ideas, "idea");
+        renderGroup("#blockerItems", selected.blockers, "blocker");
+        document.querySelector("#doneCount").textContent = selected.done.length;
+        document.querySelector("#ideaCount").textContent = selected.ideas.length;
+        document.querySelector("#blockerCount").textContent = selected.blockers.length;
+      }
+
+      function dispatchCommand() {
+        const input = document.querySelector("#terminalInput");
+        const text = input.value.trim();
+        if (!text) return;
+        if (text.startsWith("done ")) {
+          selected.done.push(text.replace("done ", ""));
+          document.querySelector("#terminalLog").textContent = `已写入重点完成项：${selected.title}`;
+        } else if (text.startsWith("idea ")) {
+          selected.ideas.push(text.replace("idea ", ""));
+          document.querySelector("#terminalLog").textContent = `已关联 idea：${selected.title}`;
+        } else if (text.startsWith("blocker ")) {
+          selected.blockers.push(text.replace("blocker ", ""));
+          document.querySelector("#terminalLog").textContent = `已记录关键卡点：${selected.title}`;
+        } else {
+          selected.ideas.push(text);
+          document.querySelector("#terminalLog").textContent = "未识别前缀，默认作为相关 idea 分发。";
+        }
+        input.value = "";
+        render();
+      }
+
+      document.querySelector("#sendCommand").addEventListener("click", dispatchCommand);
+      document.querySelector("#terminalInput").addEventListener("keydown", (event) => {
+        if (event.key === "Enter") dispatchCommand();
+      });
+      document.querySelector("#readContext").addEventListener("click", () => {
+        document.querySelector("#contextOutput").value = `# Agent Task Context
+
+Task: ${selected.title}
+Meta: ${selected.meta}
+
+## Status Summary
+${selected.summary}
+
+## Focus Done
+${selected.done.map((item) => `- ${item}`).join("\\n") || "- None"}
+
+## Related Ideas
+${selected.ideas.map((item) => `- ${item}`).join("\\n") || "- None"}
+
+## Key Blockers
+${selected.blockers.map((item) => `- ${item}`).join("\\n") || "- None"}`;
+      });
+      document.querySelector("#themeToggle").addEventListener("click", () => {
+        const root = document.documentElement;
+        root.dataset.theme = root.dataset.theme === "dark" ? "light" : "dark";
+        document.querySelector("#themeToggle").textContent = root.dataset.theme === "dark" ? "Light" : "Dark";
+      });
+      render();
+    </script>
+  </body>
+</html>

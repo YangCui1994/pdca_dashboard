@@ -24,6 +24,7 @@ class VaultStorage:
         (folder / "task.md").write_text(render_capture_markdown(capture, created), encoding="utf-8")
         (folder / "context.md").write_text("# Context\n\n", encoding="utf-8")
         (folder / "ai-notes.md").write_text("# AI Notes\n\n", encoding="utf-8")
+        (folder / "events.md").write_text("# Events\n\n", encoding="utf-8")
         return folder
 
     def create_project(self, project: Project) -> Path:
@@ -47,6 +48,24 @@ class VaultStorage:
             items.extend(folder.glob("*.md"))
         return sorted(items)
 
+    def list_work_item_summaries(self) -> list[dict[str, Any]]:
+        summaries = []
+        for path in self.list_work_items():
+            item = self.read_work_item(path)
+            summaries.append(
+                {
+                    "path": item["path"],
+                    "title": item["title"],
+                    "status": item["status"],
+                    "created": self._created_from_path(Path(item["path"])),
+                    "blocker": self._extract_section_first_line(item["task"], "当前卡点"),
+                    "basis": self._extract_section_first_line(item["task"], "已有基础")
+                    or self._first_non_empty_line(item["context"]),
+                    "last_event": self._last_event_line(item.get("events", "")),
+                }
+            )
+        return summaries
+
     def read_work_item(self, path: Path | str) -> dict[str, Any]:
         item_path = self._resolve_work_item(path)
         if item_path.is_dir():
@@ -57,6 +76,7 @@ class VaultStorage:
                 "task": self._read_optional_text(item_path / "task.md"),
                 "context": self._read_optional_text(item_path / "context.md"),
                 "ai_notes": self._read_optional_text(item_path / "ai-notes.md"),
+                "events": self._read_optional_text(item_path / "events.md"),
                 "assets": self._list_assets(item_path),
             }
         return {
@@ -66,15 +86,17 @@ class VaultStorage:
             "task": item_path.read_text(encoding="utf-8"),
             "context": "",
             "ai_notes": "",
+            "events": "",
             "assets": [],
         }
 
-    def save_work_item(self, path: Path | str, task: str, context: str, ai_notes: str) -> None:
+    def save_work_item(self, path: Path | str, task: str, context: str, ai_notes: str, events: str = "") -> None:
         item_path = self._resolve_work_item(path)
         if item_path.is_dir():
             (item_path / "task.md").write_text(task, encoding="utf-8")
             (item_path / "context.md").write_text(context, encoding="utf-8")
             (item_path / "ai-notes.md").write_text(ai_notes, encoding="utf-8")
+            (item_path / "events.md").write_text(events, encoding="utf-8")
             return
         item_path.write_text(task, encoding="utf-8")
 
@@ -97,6 +119,10 @@ Status: {item["status"]}
 ## ai-notes.md
 
 {item["ai_notes"]}
+
+## events.md
+
+{item["events"]}
 
 ## assets
 
@@ -136,3 +162,35 @@ Status: {item["status"]}
     def _title_from_path(self, path: Path) -> str:
         title = path.stem if path.is_file() else path.name
         return re.sub(r"^\d{4}-\d{2}-\d{2}-", "", title)
+
+    def _created_from_path(self, path: Path) -> str:
+        name = path.stem if path.is_file() else path.name
+        match = re.match(r"^(\d{4}-\d{2}-\d{2})-", name)
+        return match.group(1) if match else ""
+
+    def _extract_section_first_line(self, markdown: str, heading: str) -> str:
+        lines = markdown.splitlines()
+        inside = False
+        for line in lines:
+            stripped = line.strip()
+            if stripped.startswith("## "):
+                inside = stripped == f"## {heading}"
+                continue
+            if inside and stripped and not stripped.startswith("#"):
+                return stripped.removeprefix("- ").strip()
+        return ""
+
+    def _first_non_empty_line(self, text: str) -> str:
+        for line in text.splitlines():
+            stripped = line.strip()
+            if stripped and not stripped.startswith("#"):
+                return stripped.removeprefix("- ").strip()
+        return ""
+
+    def _last_event_line(self, text: str) -> str:
+        events = [
+            line.strip().removeprefix("- ").strip()
+            for line in text.splitlines()
+            if line.strip().startswith("- ")
+        ]
+        return events[-1] if events else ""

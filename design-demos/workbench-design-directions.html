@@ -1,0 +1,624 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>PDCA Workbench Design Directions</title>
+    <style>
+      :root {
+        color-scheme: light;
+        --ink: #20232d;
+        --muted: #687080;
+        --line: #e1e4ea;
+        --canvas: #f2f3f5;
+        --panel: #ffffff;
+        --orange: #d94b26;
+        --blue: #0d7bf2;
+        --green: #068b42;
+        --amber: #bd6b00;
+        --radius-xl: 28px;
+        --radius-lg: 18px;
+        --radius-md: 12px;
+        font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        margin: 0;
+        background: #fafafa;
+        color: var(--ink);
+      }
+
+      .page {
+        padding: 28px;
+      }
+
+      .intro {
+        display: grid;
+        grid-template-columns: 1fr auto;
+        gap: 24px;
+        align-items: end;
+        margin: 0 auto 24px;
+        max-width: 1500px;
+      }
+
+      .intro h1 {
+        margin: 0 0 8px;
+        font-size: 28px;
+        letter-spacing: 0;
+      }
+
+      .intro p {
+        margin: 0;
+        max-width: 780px;
+        color: var(--muted);
+        font-size: 15px;
+        line-height: 1.6;
+      }
+
+      .source-pill {
+        border-radius: 999px;
+        background: #eef0f4;
+        padding: 8px;
+        color: #4b515e;
+        font-size: 13px;
+      }
+
+      .grid {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(360px, 1fr));
+        gap: 18px;
+        margin: 0 auto;
+        max-width: 1500px;
+      }
+
+      .direction {
+        overflow: hidden;
+        border: 1px solid var(--line);
+        border-radius: 30px;
+        background: var(--canvas);
+        box-shadow: 0 18px 50px rgba(28, 31, 38, 0.08);
+      }
+
+      .direction-head {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 16px;
+        padding: 18px 20px 0;
+      }
+
+      .direction-title {
+        display: grid;
+        gap: 4px;
+      }
+
+      .direction-title h2 {
+        margin: 0;
+        font-size: 18px;
+      }
+
+      .direction-title span {
+        color: var(--muted);
+        font-size: 12px;
+      }
+
+      .segmented {
+        display: flex;
+        overflow: hidden;
+        border-radius: 999px;
+        background: #e2e5eb;
+        padding: 0;
+        white-space: nowrap;
+      }
+
+      .segmented span {
+        padding: 9px 14px;
+        color: #454b58;
+        font-weight: 680;
+        font-size: 12px;
+      }
+
+      .segmented .active {
+        background: var(--orange);
+        color: white;
+      }
+
+      .mock {
+        margin: 18px;
+        border-radius: var(--radius-xl);
+        background: var(--panel);
+        min-height: 680px;
+      }
+
+      .wa-toolbar {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 18px 20px;
+      }
+
+      .icons {
+        display: flex;
+        gap: 18px;
+        color: #596071;
+        font-size: 22px;
+      }
+
+      .icons .hot {
+        color: #ae3d1d;
+      }
+
+      .quiet-layout {
+        display: grid;
+        grid-template-columns: 132px 1fr;
+        gap: 14px;
+        padding: 0 18px 18px;
+      }
+
+      .quiet-sidebar {
+        display: grid;
+        gap: 10px;
+        align-content: start;
+      }
+
+      .nav-item {
+        border-radius: 14px;
+        padding: 11px 12px;
+        background: #f0f2f5;
+        color: #4f5665;
+        font-size: 13px;
+        font-weight: 650;
+      }
+
+      .nav-item.active {
+        background: #20232d;
+        color: #fff;
+      }
+
+      .quiet-main {
+        display: grid;
+        gap: 14px;
+      }
+
+      .progress-card,
+      .callout-card,
+      .badge-card,
+      .task-card,
+      .agent-card,
+      .dossier-card {
+        border-radius: var(--radius-lg);
+        background: #fff;
+        padding: 18px;
+      }
+
+      .progress-card {
+        border: 1px solid #edf0f3;
+      }
+
+      .progress-card h3,
+      .callout-card h3,
+      .badge-card h3,
+      .task-card h3,
+      .agent-card h3,
+      .dossier-card h3 {
+        margin: 0 0 12px;
+        font-size: 15px;
+      }
+
+      .progress-track {
+        overflow: hidden;
+        height: 16px;
+        border-radius: 999px;
+        background: #dee2e8;
+      }
+
+      .progress-fill {
+        width: 58%;
+        height: 100%;
+        background: var(--blue);
+      }
+
+      .mini-board {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 10px;
+      }
+
+      .mini-column {
+        display: grid;
+        gap: 8px;
+        min-width: 0;
+      }
+
+      .mini-column strong {
+        color: #545b69;
+        font-size: 12px;
+      }
+
+      .mini-card {
+        border: 1px solid #e5e8ee;
+        border-radius: 14px;
+        padding: 10px;
+        font-size: 12px;
+        line-height: 1.35;
+      }
+
+      .mini-card em {
+        display: block;
+        margin-bottom: 6px;
+        color: #858d9b;
+        font-style: normal;
+      }
+
+      .soft-green {
+        background: #e3f6e7;
+        color: #073f21;
+      }
+
+      .soft-amber {
+        background: #fff1c8;
+        color: #5a3402;
+      }
+
+      .callout {
+        display: grid;
+        grid-template-columns: 34px 1fr auto;
+        gap: 12px;
+        align-items: center;
+        border-radius: 18px;
+        padding: 16px;
+        font-size: 15px;
+      }
+
+      .callout button {
+        border: 0;
+        border-radius: 12px;
+        padding: 10px 14px;
+        background: var(--green);
+        color: #fff;
+        font: inherit;
+        font-weight: 700;
+      }
+
+      .soft-amber button {
+        background: var(--amber);
+      }
+
+      .badges {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 16px;
+        padding-top: 8px;
+      }
+
+      .badge-button {
+        position: relative;
+        border-radius: 12px;
+        background: #e1e3e8;
+        padding: 13px 18px;
+        color: #4c5361;
+        font-weight: 720;
+      }
+
+      .dot {
+        position: absolute;
+        top: -12px;
+        right: -9px;
+        display: grid;
+        place-items: center;
+        min-width: 26px;
+        height: 26px;
+        border: 3px solid #fff;
+        border-radius: 999px;
+        background: #0a8d3f;
+        color: white;
+        font-size: 12px;
+      }
+
+      .dot.warn {
+        background: #ec5c73;
+      }
+
+      .ops-shell {
+        display: grid;
+        grid-template-rows: auto 1fr;
+        gap: 14px;
+        padding: 0 18px 18px;
+      }
+
+      .ops-metrics {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 10px;
+      }
+
+      .metric {
+        border-radius: 16px;
+        background: #fff;
+        padding: 14px;
+      }
+
+      .metric span {
+        color: var(--muted);
+        font-size: 11px;
+      }
+
+      .metric strong {
+        display: block;
+        margin-top: 6px;
+        font-size: 24px;
+      }
+
+      .ops-body {
+        display: grid;
+        grid-template-columns: 1fr 150px;
+        gap: 12px;
+      }
+
+      .ops-list {
+        display: grid;
+        gap: 10px;
+      }
+
+      .task-card {
+        display: grid;
+        grid-template-columns: 1fr auto;
+        gap: 10px;
+        align-items: center;
+      }
+
+      .task-card p {
+        margin: 5px 0 0;
+        color: var(--muted);
+        font-size: 12px;
+      }
+
+      .status-pill {
+        border-radius: 999px;
+        background: #e7ecf5;
+        padding: 6px 10px;
+        color: #3f4757;
+        font-size: 11px;
+        font-weight: 760;
+      }
+
+      .agent-card {
+        display: grid;
+        align-content: start;
+        gap: 12px;
+        background: #1f232d;
+        color: #f5f7fb;
+      }
+
+      .agent-card p {
+        margin: 0;
+        color: #b7bfce;
+        font-size: 12px;
+        line-height: 1.45;
+      }
+
+      .agent-card button {
+        border: 0;
+        border-radius: 13px;
+        padding: 11px 12px;
+        background: #d94b26;
+        color: white;
+        font: inherit;
+        font-weight: 760;
+      }
+
+      .notebook-shell {
+        display: grid;
+        grid-template-columns: 118px 1fr;
+        gap: 14px;
+        padding: 0 18px 18px;
+      }
+
+      .tree {
+        display: grid;
+        gap: 8px;
+        align-content: start;
+        color: #596071;
+        font-size: 12px;
+      }
+
+      .tree div {
+        border-radius: 12px;
+        background: #f0f2f5;
+        padding: 10px;
+      }
+
+      .tree .selected {
+        background: #fff;
+        color: #20232d;
+        font-weight: 760;
+      }
+
+      .dossier {
+        display: grid;
+        gap: 14px;
+      }
+
+      .dossier-card textarea {
+        width: 100%;
+        min-height: 120px;
+        resize: none;
+        border: 1px solid #e0e4eb;
+        border-radius: 14px;
+        padding: 12px;
+        font: inherit;
+        line-height: 1.45;
+      }
+
+      .file-row {
+        display: grid;
+        grid-template-columns: 1fr auto;
+        gap: 12px;
+        align-items: center;
+        border-radius: 14px;
+        background: #f4f0e9;
+        padding: 12px;
+        color: #473a28;
+        font-size: 13px;
+      }
+
+      @media (max-width: 1180px) {
+        .grid {
+          grid-template-columns: 1fr;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <main class="page">
+      <section class="intro">
+        <div>
+          <h1>PDCA Workbench · 3 Design Directions</h1>
+          <p>三版都参考了 Web Awesome 截图里的浅灰大画布、圆角白色模块、胶囊切换、柔和 callout 和 badge 语言；区别在于信息架构和产品气质。</p>
+        </div>
+        <div class="source-pill">Reference: Web Awesome component preview</div>
+      </section>
+
+      <section class="grid">
+        <article class="direction">
+          <div class="direction-head">
+            <div class="direction-title">
+              <h2>A · Quiet Workbench</h2>
+              <span>长期使用 / Markdown / 克制耐看</span>
+            </div>
+            <div class="segmented"><span class="active">Light</span><span>Dark</span></div>
+          </div>
+          <div class="wa-toolbar">
+            <div class="icons"><span class="hot">♨</span><span>⌁</span><span>⌖</span><span>✎</span></div>
+            <div class="segmented"><span class="active">Preview</span><span>Code</span></div>
+          </div>
+          <div class="mock">
+            <div class="quiet-layout">
+              <nav class="quiet-sidebar">
+                <div class="nav-item active">Inbox · 12</div>
+                <div class="nav-item">Active · 4</div>
+                <div class="nav-item">Waiting · 3</div>
+                <div class="nav-item">Archive</div>
+              </nav>
+              <div class="quiet-main">
+                <section class="progress-card">
+                  <h3>Today’s workbench is half way there...</h3>
+                  <div class="progress-track"><div class="progress-fill"></div></div>
+                </section>
+                <section class="callout-card">
+                  <div class="callout soft-green">
+                    <span>☘</span><span>3 个任务已具备完整上下文。</span><button>进入详情</button>
+                  </div>
+                  <br>
+                  <div class="callout soft-amber">
+                    <span>◉</span><span>2 个任务缺少人工确认。</span><button>补上下文</button>
+                  </div>
+                </section>
+                <section class="badge-card">
+                  <h3>Vault Overview</h3>
+                  <div class="badges">
+                    <div class="badge-button">Inbox <span class="dot">12</span></div>
+                    <div class="badge-button">Active <span class="dot warn">4</span></div>
+                    <div class="badge-button">Waiting <span class="dot">3</span></div>
+                  </div>
+                </section>
+              </div>
+            </div>
+          </div>
+        </article>
+
+        <article class="direction">
+          <div class="direction-head">
+            <div class="direction-title">
+              <h2>B · Agent Operations Console</h2>
+              <span>Agent-ready / 状态中控 / 产品感最强</span>
+            </div>
+            <div class="segmented"><span class="active">Ops</span><span>Docs</span></div>
+          </div>
+          <div class="wa-toolbar">
+            <div class="icons"><span class="hot">◴</span><span>↗</span><span>⌁</span><span>▣</span></div>
+            <div class="segmented"><span class="active">Preview</span><span>Code</span></div>
+          </div>
+          <div class="mock">
+            <div class="ops-shell">
+              <section class="ops-metrics">
+                <div class="metric"><span>Inbox</span><strong>12</strong></div>
+                <div class="metric"><span>Agent-ready</span><strong>7</strong></div>
+                <div class="metric"><span>Waiting</span><strong>3</strong></div>
+                <div class="metric"><span>Today</span><strong>4</strong></div>
+              </section>
+              <section class="ops-body">
+                <div class="ops-list">
+                  <div class="task-card">
+                    <div><h3>炉温跳变口径核实</h3><p>task.md · context.md · assets/query.sql</p></div>
+                    <span class="status-pill">AGENT READY</span>
+                  </div>
+                  <div class="task-card">
+                    <div><h3>领导反馈草稿整理</h3><p>communication-draft · ai-notes pending</p></div>
+                    <span class="status-pill">NEEDS CONTEXT</span>
+                  </div>
+                  <div class="task-card">
+                    <div><h3>Round Table 决策接口</h3><p>design note · stop before execution</p></div>
+                    <span class="status-pill">DESIGN</span>
+                  </div>
+                </div>
+                <aside class="agent-card">
+                  <h3>Agent Context</h3>
+                  <p>读取 task.md、context.md、ai-notes.md 和 assets 列表，形成单次 Agent 可消费上下文。</p>
+                  <button>读取上下文</button>
+                </aside>
+              </section>
+            </div>
+          </div>
+        </article>
+
+        <article class="direction">
+          <div class="direction-head">
+            <div class="direction-title">
+              <h2>C · Research Notebook</h2>
+              <span>资料夹 / 研究台 / 任务即上下文包</span>
+            </div>
+            <div class="segmented"><span class="active">Notes</span><span>Files</span></div>
+          </div>
+          <div class="wa-toolbar">
+            <div class="icons"><span class="hot">⌑</span><span>⌙</span><span>⌗</span><span>✐</span></div>
+            <div class="segmented"><span class="active">Preview</span><span>Code</span></div>
+          </div>
+          <div class="mock">
+            <div class="notebook-shell">
+              <nav class="tree">
+                <div>Vault</div>
+                <div class="selected">炉温跳变</div>
+                <div>沟通草稿</div>
+                <div>数据口径</div>
+                <div>Assets</div>
+              </nav>
+              <div class="dossier">
+                <section class="dossier-card">
+                  <h3>task.md</h3>
+                  <textarea># 炉温跳变口径核实
+
+下一步：确认平台清洗逻辑是否变更。</textarea>
+                </section>
+                <section class="dossier-card">
+                  <h3>Context Completeness</h3>
+                  <div class="callout soft-green">
+                    <span>✓</span><span>task.md 与 context.md 已就绪。</span><button>Agent 读取</button>
+                  </div>
+                </section>
+                <section class="dossier-card">
+                  <h3>Assets</h3>
+                  <div class="file-row"><span>assets/query.sql</span><strong>SQL</strong></div>
+                </section>
+              </div>
+            </div>
+          </div>
+        </article>
+      </section>
+    </main>
+  </body>
+</html>

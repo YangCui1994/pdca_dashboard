@@ -1,56 +1,34 @@
-const titleInput = document.querySelector("#titleInput");
-const kindInput = document.querySelector("#kindInput");
-const rawInput = document.querySelector("#rawInput");
-const aiOutput = document.querySelector("#aiOutput");
-const statusText = document.querySelector("#statusText");
-const savedPath = document.querySelector("#savedPath");
-const fileList = document.querySelector("#fileList");
-const refreshFiles = document.querySelector("#refreshFiles");
-const boardPanel = document.querySelector("#boardPanel");
 const boardGrid = document.querySelector("#boardGrid");
-const viewButtons = document.querySelectorAll("[data-view]");
+const refreshItems = document.querySelector("#refreshItems");
 
 const boardStatuses = ["inbox", "active", "waiting", "done", "archive"];
-let currentFiles = [];
+const statusLabels = {
+  inbox: "收件箱",
+  active: "推进中",
+  waiting: "等待",
+  done: "完成",
+  archive: "归档"
+};
 
-function titleFromPath(file) {
-  const filename = file.split("/").pop() || file;
-  return filename.replace(/^\d{4}-\d{2}-\d{2}-/, "").replace(/\.md$/, "");
+function detailUrl(path) {
+  return `/detail.html?path=${encodeURIComponent(path)}`;
 }
 
-function statusFromPath(file) {
-  const parts = file.split("/");
-  return parts.find((part) => boardStatuses.includes(part)) || "inbox";
+function emptyText(value, fallback) {
+  return value && value.trim() ? value : fallback;
 }
 
-function detailUrl(file) {
-  return `/detail.html?path=${encodeURIComponent(file)}`;
-}
-
-async function refreshFileList() {
-  const response = await fetch("/api/files");
+async function refreshBoard() {
+  const response = await fetch("/api/work-items");
   const payload = await response.json();
-  currentFiles = payload.files;
-  renderFileList(currentFiles);
-  renderBoard(currentFiles);
+  renderBoard(payload.items || []);
 }
 
-function renderFileList(files) {
-  fileList.innerHTML = "";
-  for (const file of files) {
-    const item = document.createElement("li");
-    const link = document.createElement("a");
-    link.href = detailUrl(file);
-    link.textContent = file;
-    item.appendChild(link);
-    fileList.appendChild(item);
-  }
-}
-
-function renderBoard(files) {
+function renderBoard(items) {
   const grouped = Object.fromEntries(boardStatuses.map((status) => [status, []]));
-  for (const file of files) {
-    grouped[statusFromPath(file)].push(file);
+  for (const item of items) {
+    const status = boardStatuses.includes(item.status) ? item.status : "inbox";
+    grouped[status].push(item);
   }
 
   boardGrid.innerHTML = "";
@@ -60,23 +38,30 @@ function renderBoard(files) {
 
     const heading = document.createElement("div");
     heading.className = "board-column-header";
-    heading.innerHTML = `<span>${status}</span><strong>${grouped[status].length}</strong>`;
+    heading.innerHTML = `<span>${statusLabels[status]}</span><strong>${grouped[status].length}</strong>`;
     column.appendChild(heading);
 
     const cards = document.createElement("div");
     cards.className = "board-cards";
-    for (const file of grouped[status]) {
+    for (const item of grouped[status]) {
       const card = document.createElement("a");
       card.className = "board-card";
-      card.href = detailUrl(file);
+      card.href = detailUrl(item.path);
 
       const title = document.createElement("h2");
-      title.textContent = titleFromPath(file);
+      title.textContent = item.title;
 
-      const path = document.createElement("p");
-      path.textContent = file;
+      const blocker = document.createElement("p");
+      blocker.className = "board-card-blocker";
+      blocker.textContent = `卡点：${emptyText(item.blocker, "未填写")}`;
 
-      card.append(title, path);
+      const basis = document.createElement("p");
+      basis.textContent = `基础：${emptyText(item.basis, "未填写")}`;
+
+      const event = document.createElement("p");
+      event.textContent = `最近：${emptyText(item.last_event, "暂无事件")}`;
+
+      card.append(title, blocker, basis, event);
       cards.appendChild(card);
     }
     column.appendChild(cards);
@@ -84,52 +69,5 @@ function renderBoard(files) {
   }
 }
 
-function setView(view) {
-  const boardMode = view === "board";
-  document.querySelector(".workspace").classList.toggle("board-mode", boardMode);
-  boardPanel.hidden = !boardMode;
-  fileList.hidden = boardMode;
-  for (const button of viewButtons) {
-    button.classList.toggle("is-active", button.dataset.view === view);
-  }
-}
-
-async function runAction(action) {
-  const rawText = rawInput.value.trim();
-  if (!rawText) {
-    statusText.textContent = "请先输入内容。";
-    return;
-  }
-  statusText.textContent = "AI 正在处理。";
-  savedPath.textContent = "";
-  const response = await fetch("/api/capture", {
-    method: "POST",
-    headers: {"Content-Type": "application/json"},
-    body: JSON.stringify({
-      title: titleInput.value.trim() || "未命名输入",
-      kind: kindInput.value,
-      raw_text: rawText,
-      action
-    })
-  });
-  if (!response.ok) {
-    statusText.textContent = `请求失败：${response.status}`;
-    return;
-  }
-  const payload = await response.json();
-  aiOutput.value = payload.ai_output;
-  savedPath.textContent = `已保存：${payload.path}`;
-  statusText.textContent = "完成。";
-  await refreshFileList();
-}
-
-document.querySelectorAll("[data-action]").forEach((button) => {
-  button.addEventListener("click", () => runAction(button.dataset.action));
-});
-
-viewButtons.forEach((button) => {
-  button.addEventListener("click", () => setView(button.dataset.view));
-});
-
-refreshFiles.addEventListener("click", refreshFileList);
-refreshFileList();
+refreshItems.addEventListener("click", refreshBoard);
+refreshBoard();

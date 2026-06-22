@@ -28,6 +28,13 @@ class AITests(unittest.TestCase):
         self.assertEqual(args[0], "/Users/yang/.local/bin/hermes")
         self.assertIn("-z", args)
 
+    def test_pdca_gate_prompt_replaces_input_marker(self):
+        prompt = render_prompt(Path("app/prompts/pdca_gate.md"), "今天我觉得推进慢，因为对方不配合")
+        self.assertIn("今天我觉得推进慢，因为对方不配合", prompt)
+        self.assertNotIn("{{input}}", prompt)
+        self.assertIn("true_do", prompt)
+        self.assertIn("bias_or_judgment", prompt)
+
 
 if __name__ == "__main__":
     unittest.main()

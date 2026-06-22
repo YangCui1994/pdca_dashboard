@@ -24,6 +24,9 @@ class WorkbenchHandler(SimpleHTTPRequestHandler):
 
     def do_GET(self) -> None:
         parsed = urlparse(self.path)
+        if parsed.path == "/api/work-items":
+            self._send_json({"items": self.app_state.list_work_item_summaries()})
+            return
         if parsed.path == "/api/files":
             self._send_json({"files": self.app_state.list_files()})
             return
@@ -58,6 +61,7 @@ class WorkbenchHandler(SimpleHTTPRequestHandler):
                 task=payload.get("task", ""),
                 context=payload.get("context", ""),
                 ai_notes=payload.get("ai_notes", ""),
+                events=payload.get("events", ""),
             )
             self._send_json({"ok": True})
             return

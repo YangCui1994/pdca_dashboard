@@ -3,62 +3,25 @@
   <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Personal Workbench</title>
-    <link rel="stylesheet" href="/styles.css?v=detail">
+    <title>全部事项 - Personal Workbench</title>
+    <link rel="stylesheet" href="/styles.css?v=pdca-pages">
   </head>
   <body>
-    <main class="workspace">
-      <aside class="panel inbox-panel">
-        <div class="panel-header">
-          <h1>Workbench</h1>
-          <button id="refreshFiles" title="刷新文件列表">↻</button>
+    <main class="page-shell">
+      <header class="topbar">
+        <div>
+          <h1>全部事项</h1>
+          <p>按状态查看卡点、已有基础和最近事件。</p>
         </div>
-        <div class="view-toggle" aria-label="视图切换">
-          <button class="view-button is-active" type="button" data-view="list">列表</button>
-          <button class="view-button" type="button" data-view="board">看板</button>
-        </div>
-        <ul id="fileList" class="file-list"></ul>
-      </aside>
-
-      <section class="panel board-panel" id="boardPanel" hidden>
+        <nav class="topbar-actions" aria-label="页面导航">
+          <a class="nav-button" href="/today.html">今日 PDCA</a>
+          <button id="refreshItems" type="button">刷新</button>
+        </nav>
+      </header>
+      <section class="board-panel is-full">
         <div class="board-grid" id="boardGrid"></div>
       </section>
-
-      <section class="panel capture-panel">
-        <label>
-          标题
-          <input id="titleInput" type="text" value="未命名输入">
-        </label>
-        <label>
-          类型
-          <select id="kindInput">
-            <option value="idea">idea</option>
-            <option value="task">task</option>
-            <option value="project-note">project-note</option>
-            <option value="data-issue">data-issue</option>
-            <option value="communication-draft">communication-draft</option>
-          </select>
-        </label>
-        <label>
-          原始输入
-          <textarea id="rawInput" rows="16" placeholder="写下异常、想法、领导需求、沟通草稿或字段口径疑问"></textarea>
-        </label>
-      </section>
-
-      <section class="panel ai-panel">
-        <div class="actions">
-          <button data-action="structure_capture">整理成卡片</button>
-          <button data-action="idea_critique">犀利审查 idea</button>
-          <button data-action="daily_review">生成日复盘</button>
-        </div>
-        <div id="statusText" class="status-text">等待输入。</div>
-        <label>
-          AI 输出
-          <textarea id="aiOutput" rows="20"></textarea>
-        </label>
-        <div class="saved-path" id="savedPath"></div>
-      </section>
     </main>
-    <script src="/app.js?v=detail"></script>
+    <script src="/app.js?v=pdca-pages"></script>
   </body>
 </html>

@@ -23,6 +23,10 @@ class ServerRouteTests(unittest.TestCase):
                 base_url = f"http://127.0.0.1:{server.server_port}"
                 encoded_path = quote(str(folder))
 
+                summaries = self._get_json(f"{base_url}/api/work-items")
+                self.assertEqual(len(summaries["items"]), 1)
+                self.assertEqual(summaries["items"][0]["title"], "炉温跳变")
+
                 item = self._get_json(f"{base_url}/api/work-item?path={encoded_path}")
                 self.assertIn("数据跳变", item["task"])
 
@@ -33,6 +37,7 @@ class ServerRouteTests(unittest.TestCase):
                         "task": "更新后的任务",
                         "context": "上下文资料",
                         "ai_notes": "AI 记录",
+                        "events": "# Events\n\n- 发送了复盘草稿",
                     },
                 )
 
@@ -40,6 +45,7 @@ class ServerRouteTests(unittest.TestCase):
                 self.assertIn("更新后的任务", context["context"])
                 self.assertIn("上下文资料", context["context"])
                 self.assertIn("AI 记录", context["context"])
+                self.assertIn("发送了复盘草稿", context["context"])
             finally:
                 server.shutdown()
                 server.server_close()

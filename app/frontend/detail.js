@@ -4,6 +4,7 @@ const detailStatus = document.querySelector("#detailStatus");
 const taskEditor = document.querySelector("#taskEditor");
 const contextEditor = document.querySelector("#contextEditor");
 const aiNotesEditor = document.querySelector("#aiNotesEditor");
+const eventsEditor = document.querySelector("#eventsEditor");
 const agentContextOutput = document.querySelector("#agentContextOutput");
 const assetList = document.querySelector("#assetList");
 const saveButton = document.querySelector("#saveButton");
@@ -32,6 +33,7 @@ async function loadWorkItem() {
   taskEditor.value = item.task;
   contextEditor.value = item.context;
   aiNotesEditor.value = item.ai_notes;
+  eventsEditor.value = item.events || "";
   renderAssets(item.assets);
   setDetailStatus(`状态：${item.status}`);
 }
@@ -60,7 +62,8 @@ async function saveWorkItem() {
       path: workItemPath,
       task: taskEditor.value,
       context: contextEditor.value,
-      ai_notes: aiNotesEditor.value
+      ai_notes: aiNotesEditor.value,
+      events: eventsEditor.value
     })
   });
   if (!response.ok) {

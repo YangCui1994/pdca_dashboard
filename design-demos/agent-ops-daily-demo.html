@@ -1,0 +1,538 @@
+<!doctype html>
+<html lang="zh-CN" data-theme="light">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Agent Operations Daily Demo</title>
+    <style>
+      :root {
+        --bg: #f6f7f7;
+        --canvas: #eceef1;
+        --panel: #ffffff;
+        --panel-soft: #f6f7f9;
+        --ink: #20232d;
+        --muted: #687080;
+        --line: #dde1e7;
+        --orange: #d64b27;
+        --blue: #0d7bf2;
+        --green: #078f43;
+        --amber: #be6900;
+        --shadow: 0 24px 60px rgba(33, 37, 45, 0.08);
+        color-scheme: light;
+        font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      }
+
+      [data-theme="dark"] {
+        --bg: #16171b;
+        --canvas: #23252b;
+        --panel: #2c2f37;
+        --panel-soft: #24272e;
+        --ink: #f2f4f8;
+        --muted: #a7afbd;
+        --line: #3a3f49;
+        --orange: #ef7045;
+        --blue: #5ea5ff;
+        --green: #38b56e;
+        --amber: #df9442;
+        --shadow: 0 28px 70px rgba(0, 0, 0, 0.28);
+        color-scheme: dark;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        margin: 0;
+        min-height: 100vh;
+        background: var(--bg);
+        color: var(--ink);
+      }
+
+      button,
+      textarea {
+        font: inherit;
+      }
+
+      .shell {
+        padding: 24px;
+      }
+
+      .app {
+        display: grid;
+        grid-template-columns: 260px minmax(520px, 1fr) 360px;
+        gap: 1px;
+        overflow: hidden;
+        min-height: calc(100vh - 48px);
+        border: 1px solid var(--line);
+        border-radius: 32px;
+        background: var(--canvas);
+        box-shadow: var(--shadow);
+      }
+
+      .pane {
+        background: var(--panel);
+        padding: 22px;
+        overflow: auto;
+      }
+
+      .brand {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: 24px;
+      }
+
+      .brand h1 {
+        margin: 0;
+        font-size: 19px;
+      }
+
+      .theme-toggle,
+      .pill-button,
+      .primary-button {
+        border: 0;
+        cursor: pointer;
+      }
+
+      .theme-toggle {
+        border-radius: 999px;
+        background: var(--panel-soft);
+        color: var(--ink);
+        padding: 9px 12px;
+      }
+
+      .date-stack {
+        display: grid;
+        gap: 10px;
+      }
+
+      .date-button {
+        border: 0;
+        border-radius: 16px;
+        background: var(--panel-soft);
+        color: var(--muted);
+        cursor: pointer;
+        padding: 13px;
+        text-align: left;
+      }
+
+      .date-button.active {
+        background: var(--ink);
+        color: var(--panel);
+      }
+
+      .nav-block {
+        margin-top: 22px;
+      }
+
+      .nav-block h2,
+      .main-head h2,
+      .side-title {
+        margin: 0 0 12px;
+        font-size: 13px;
+        color: var(--muted);
+        text-transform: uppercase;
+      }
+
+      .metric-grid {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 10px;
+      }
+
+      .metric {
+        border-radius: 18px;
+        background: var(--panel-soft);
+        padding: 14px;
+      }
+
+      .metric span {
+        color: var(--muted);
+        font-size: 12px;
+      }
+
+      .metric strong {
+        display: block;
+        margin-top: 7px;
+        font-size: 28px;
+      }
+
+      .main-head {
+        display: flex;
+        align-items: flex-start;
+        justify-content: space-between;
+        gap: 16px;
+        margin-bottom: 18px;
+      }
+
+      .main-head h1 {
+        margin: 0 0 8px;
+        font-size: 28px;
+      }
+
+      .main-head p {
+        margin: 0;
+        color: var(--muted);
+        line-height: 1.5;
+      }
+
+      .segmented {
+        display: flex;
+        overflow: hidden;
+        border-radius: 999px;
+        background: var(--canvas);
+      }
+
+      .segmented span {
+        padding: 10px 16px;
+        color: var(--muted);
+        font-weight: 720;
+      }
+
+      .segmented .active {
+        background: var(--orange);
+        color: white;
+      }
+
+      .progress-card,
+      .today-card,
+      .queue-card,
+      .agent-panel,
+      .detail-panel {
+        border-radius: 24px;
+        background: var(--panel-soft);
+        padding: 18px;
+      }
+
+      .progress-card {
+        margin-bottom: 14px;
+      }
+
+      .progress-card h3 {
+        margin: 0 0 14px;
+        font-size: 16px;
+      }
+
+      .track {
+        overflow: hidden;
+        height: 18px;
+        border-radius: 999px;
+        background: color-mix(in oklab, var(--muted) 20%, transparent);
+      }
+
+      .fill {
+        width: 50%;
+        height: 100%;
+        background: var(--blue);
+        transition: width 180ms ease;
+      }
+
+      .section-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 14px;
+      }
+
+      .task-list {
+        display: grid;
+        gap: 10px;
+      }
+
+      .task-row {
+        display: grid;
+        grid-template-columns: auto 1fr auto;
+        gap: 10px;
+        align-items: center;
+        border: 1px solid var(--line);
+        border-radius: 18px;
+        background: var(--panel);
+        padding: 12px;
+      }
+
+      .task-row input {
+        width: 18px;
+        height: 18px;
+      }
+
+      .task-row button {
+        border: 0;
+        border-radius: 12px;
+        background: var(--canvas);
+        color: var(--ink);
+        cursor: pointer;
+        padding: 8px 10px;
+      }
+
+      .task-title {
+        display: grid;
+        gap: 4px;
+      }
+
+      .task-title strong {
+        font-size: 14px;
+      }
+
+      .task-title span {
+        color: var(--muted);
+        font-size: 12px;
+      }
+
+      .checked strong {
+        text-decoration: line-through;
+        color: var(--muted);
+      }
+
+      .queue-item {
+        display: grid;
+        grid-template-columns: 1fr auto;
+        gap: 10px;
+        align-items: center;
+        border-radius: 18px;
+        background: var(--panel);
+        padding: 13px;
+      }
+
+      .pill-button {
+        border-radius: 999px;
+        background: var(--orange);
+        color: #fff;
+        padding: 8px 11px;
+        font-weight: 760;
+      }
+
+      .side-stack {
+        display: grid;
+        gap: 14px;
+      }
+
+      .agent-panel {
+        background: var(--ink);
+        color: var(--panel);
+      }
+
+      .agent-panel p {
+        color: color-mix(in oklab, var(--panel) 72%, transparent);
+        line-height: 1.5;
+      }
+
+      .primary-button {
+        width: 100%;
+        border-radius: 16px;
+        background: var(--orange);
+        color: #fff;
+        padding: 13px;
+        font-weight: 800;
+      }
+
+      .context-output,
+      .notes {
+        width: 100%;
+        border: 1px solid var(--line);
+        border-radius: 16px;
+        background: var(--panel);
+        color: var(--ink);
+        padding: 12px;
+        line-height: 1.45;
+        resize: vertical;
+      }
+
+      .context-output {
+        min-height: 190px;
+      }
+
+      .notes {
+        min-height: 110px;
+      }
+
+      @media (max-width: 1180px) {
+        .app {
+          grid-template-columns: 1fr;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <main class="shell">
+      <section class="app">
+        <aside class="pane">
+          <div class="brand">
+            <h1>Agent Ops</h1>
+            <button class="theme-toggle" id="themeToggle">Dark</button>
+          </div>
+
+          <div class="date-stack" id="dateStack">
+            <button class="date-button active" data-date="2026-06-18"><strong>今天</strong><br>2026-06-18</button>
+            <button class="date-button" data-date="2026-06-19"><strong>明天</strong><br>2026-06-19</button>
+            <button class="date-button" data-date="weekly"><strong>本周池</strong><br>候选任务</button>
+          </div>
+
+          <section class="nav-block">
+            <h2>Daily Load</h2>
+            <div class="metric-grid">
+              <div class="metric"><span>Today</span><strong id="todayCount">4</strong></div>
+              <div class="metric"><span>Done</span><strong id="doneCount">2</strong></div>
+              <div class="metric"><span>Ready</span><strong>7</strong></div>
+              <div class="metric"><span>Waiting</span><strong>3</strong></div>
+            </div>
+          </section>
+        </aside>
+
+        <section class="pane">
+          <header class="main-head">
+            <div>
+              <h2>Daily Command Center</h2>
+              <h1 id="dayTitle">今天的推进清单</h1>
+              <p>先选今日任务，再处理上下文是否完整。这里强调推进、状态和 Agent 可接手程度。</p>
+            </div>
+            <div class="segmented"><span class="active">Preview</span><span>Code</span></div>
+          </header>
+
+          <section class="progress-card">
+            <h3 id="progressTitle">Whoaaa, today's plan is half way there...</h3>
+            <div class="track"><div class="fill" id="progressFill"></div></div>
+          </section>
+
+          <div class="section-grid">
+            <section class="today-card">
+              <h2 class="side-title">Today Checklist</h2>
+              <div class="task-list" id="todayList"></div>
+            </section>
+
+            <section class="queue-card">
+              <h2 class="side-title">Candidate Pool</h2>
+              <div class="task-list" id="queueList"></div>
+            </section>
+          </div>
+        </section>
+
+        <aside class="pane side-stack">
+          <section class="agent-panel">
+            <h2>Agent Context</h2>
+            <p id="selectedSummary">选择一个任务后，可以读取它的 task.md、context.md、ai-notes.md 与 assets。</p>
+            <button class="primary-button" id="contextButton">读取上下文</button>
+          </section>
+
+          <section class="detail-panel">
+            <h2 class="side-title">Selected Work Item</h2>
+            <h3 id="selectedTitle">炉温跳变口径核实</h3>
+            <p id="selectedMeta">data-issue · agent-ready · assets/query.sql</p>
+            <textarea class="notes" id="dailyNotes">今日推进记录：
+- 等平台确认清洗逻辑
+- 输出一版领导反馈草稿</textarea>
+          </section>
+
+          <textarea class="context-output" id="contextOutput" readonly></textarea>
+        </aside>
+      </section>
+    </main>
+
+    <script>
+      const tasks = [
+        { id: 1, title: "炉温跳变口径核实", meta: "data-issue · agent-ready · assets/query.sql", done: true },
+        { id: 2, title: "领导反馈草稿整理", meta: "communication-draft · needs context", done: true },
+        { id: 3, title: "MDP 详情页验收", meta: "task · context ready", done: false },
+        { id: 4, title: "Agent Context 读取边界", meta: "architecture · stop before round table", done: false }
+      ];
+
+      const queue = [
+        { id: 5, title: "每日任务未完成原因模型", meta: "daily checklist · design" },
+        { id: 6, title: "Waiting 项外部阻塞分类", meta: "workflow · candidate" },
+        { id: 7, title: "任务资料夹 assets 上传入口", meta: "context pack · candidate" }
+      ];
+
+      let selected = tasks[0];
+
+      function render() {
+        const todayList = document.querySelector("#todayList");
+        const queueList = document.querySelector("#queueList");
+        todayList.innerHTML = "";
+        queueList.innerHTML = "";
+
+        for (const task of tasks) {
+          const row = document.createElement("div");
+          row.className = `task-row ${task.done ? "checked" : ""}`;
+          row.innerHTML = `
+            <input type="checkbox" ${task.done ? "checked" : ""} aria-label="完成 ${task.title}">
+            <div class="task-title"><strong>${task.title}</strong><span>${task.meta}</span></div>
+            <button type="button">查看</button>
+          `;
+          row.querySelector("input").addEventListener("change", (event) => {
+            task.done = event.target.checked;
+            render();
+          });
+          row.querySelector("button").addEventListener("click", () => {
+            selected = task;
+            updateSelected();
+          });
+          todayList.appendChild(row);
+        }
+
+        for (const item of queue) {
+          const row = document.createElement("div");
+          row.className = "queue-item";
+          row.innerHTML = `
+            <div class="task-title"><strong>${item.title}</strong><span>${item.meta}</span></div>
+            <button class="pill-button" type="button">加入今日</button>
+          `;
+          row.querySelector("button").addEventListener("click", () => {
+            tasks.push({...item, done: false});
+            queue.splice(queue.indexOf(item), 1);
+            render();
+          });
+          queueList.appendChild(row);
+        }
+
+        const done = tasks.filter((task) => task.done).length;
+        document.querySelector("#todayCount").textContent = tasks.length;
+        document.querySelector("#doneCount").textContent = done;
+        document.querySelector("#progressFill").style.width = `${Math.round(done / tasks.length * 100)}%`;
+        document.querySelector("#progressTitle").textContent = done === tasks.length ? "Today's plan is complete." : "Whoaaa, today's plan is half way there...";
+        updateSelected();
+      }
+
+      function updateSelected() {
+        document.querySelector("#selectedTitle").textContent = selected.title;
+        document.querySelector("#selectedMeta").textContent = selected.meta;
+        document.querySelector("#selectedSummary").textContent = `${selected.title} 已选中。读取上下文前可先补充右下角今日推进记录。`;
+      }
+
+      document.querySelector("#contextButton").addEventListener("click", () => {
+        document.querySelector("#contextOutput").value = `# Agent Task Context
+
+Work item: ${selected.title}
+Meta: ${selected.meta}
+
+## task.md
+${selected.title}
+
+## context.md
+${document.querySelector("#dailyNotes").value}
+
+## ai-notes.md
+今日建议：先推进最小外部确认，再生成可发送反馈。
+
+## assets
+- assets/query.sql
+- assets/platform-screenshot.png`;
+      });
+
+      document.querySelector("#themeToggle").addEventListener("click", () => {
+        const root = document.documentElement;
+        const dark = root.dataset.theme === "dark";
+        root.dataset.theme = dark ? "light" : "dark";
+        document.querySelector("#themeToggle").textContent = dark ? "Dark" : "Light";
+      });
+
+      document.querySelectorAll(".date-button").forEach((button) => {
+        button.addEventListener("click", () => {
+          document.querySelectorAll(".date-button").forEach((item) => item.classList.remove("active"));
+          button.classList.add("active");
+          document.querySelector("#dayTitle").textContent = button.dataset.date === "weekly" ? "本周候选任务池" : `${button.textContent.trim().split("\\n")[0]}的推进清单`;
+        });
+      });
+
+      render();
+    </script>
+  </body>
+</html>
