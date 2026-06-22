@@ -35,6 +35,14 @@ class AITests(unittest.TestCase):
         self.assertIn("true_do", prompt)
         self.assertIn("bias_or_judgment", prompt)
 
+    def test_pdca_periodic_review_prompt_replaces_input_marker(self):
+        prompt = render_prompt(Path("app/prompts/pdca_periodic_review.md"), "## 2026-06-22 - 今日 PDCA")
+        self.assertIn("## 2026-06-22 - 今日 PDCA", prompt)
+        self.assertNotIn("{{input}}", prompt)
+        self.assertIn("Plan", prompt)
+        self.assertIn("Do", prompt)
+        self.assertIn("周期 Review", prompt)
+
 
 if __name__ == "__main__":
     unittest.main()

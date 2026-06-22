@@ -38,6 +38,10 @@ class WorkbenchHandler(SimpleHTTPRequestHandler):
             path = self._query_value(parsed.query, "path")
             self._send_json({"context": self.app_state.render_agent_context(path)})
             return
+        if parsed.path == "/api/context-readiness":
+            path = self._query_value(parsed.query, "path")
+            self._send_json(self.app_state.context_readiness(path))
+            return
         if parsed.path == "/":
             self.path = "/index.html"
         return super().do_GET()
@@ -54,6 +58,22 @@ class WorkbenchHandler(SimpleHTTPRequestHandler):
             )
             self._send_json(result)
             return
+        if parsed.path == "/api/pdca-entry":
+            payload = self._read_json()
+            result = self.app_state.analyze_pdca_entry(
+                title=payload.get("title", "今日 PDCA 输入"),
+                plan=payload.get("plan", ""),
+                do=payload.get("do", ""),
+                check=payload.get("check", ""),
+                act=payload.get("act", ""),
+            )
+            self._send_json(result)
+            return
+        if parsed.path == "/api/pdca-review":
+            payload = self._read_json()
+            result = self.app_state.review_pdca_history(limit=self._int_value(payload.get("limit"), default=20))
+            self._send_json(result)
+            return
         if parsed.path == "/api/work-item":
             payload = self._read_json()
             self.app_state.save_work_item(
@@ -64,6 +84,22 @@ class WorkbenchHandler(SimpleHTTPRequestHandler):
                 events=payload.get("events", ""),
             )
             self._send_json({"ok": True})
+            return
+        if parsed.path == "/api/work-item-status":
+            payload = self._read_json()
+            result = self.app_state.move_work_item_status(
+                path=payload.get("path", ""),
+                status=payload.get("status", "inbox"),
+            )
+            self._send_json(result)
+            return
+        if parsed.path == "/api/work-item-event":
+            payload = self._read_json()
+            result = self.app_state.append_work_item_event(
+                path=payload.get("path", ""),
+                event=payload.get("event", ""),
+            )
+            self._send_json(result)
             return
         self.send_error(404, "Route not found")
 
@@ -90,6 +126,12 @@ class WorkbenchHandler(SimpleHTTPRequestHandler):
     def _query_value(self, query: str, key: str) -> str:
         values = parse_qs(query).get(key, [])
         return values[0] if values else ""
+
+    def _int_value(self, value, default: int) -> int:
+        try:
+            return int(value)
+        except (TypeError, ValueError):
+            return default
 
 
 def main() -> None:

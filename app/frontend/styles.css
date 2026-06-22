@@ -392,6 +392,91 @@ textarea {
   gap: 14px;
 }
 
+.pdca-form-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.filter-panel {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(120px, 1fr));
+  gap: 12px;
+}
+
+.compact-filter {
+  grid-template-columns: 1fr 1fr;
+  margin-bottom: 16px;
+}
+
+.field-note {
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 500;
+  line-height: 1.45;
+}
+
+.pdca-result-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+  margin: 12px 0 16px;
+}
+
+.pdca-result-grid div,
+.context-readiness {
+  border: 1px solid var(--line);
+  border-radius: var(--radius-md);
+  background: var(--soft-panel);
+  padding: 12px;
+}
+
+.pdca-result-grid h3,
+.panel h3 {
+  margin: 0 0 8px;
+  font-size: 13px;
+}
+
+.pdca-result-grid pre {
+  min-height: 44px;
+  margin: 0;
+  color: var(--muted);
+  font: inherit;
+  font-size: 12px;
+  line-height: 1.45;
+  white-space: pre-wrap;
+}
+
+.board-card-title {
+  color: inherit;
+  text-decoration: none;
+}
+
+.card-status-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.card-status-actions button {
+  background: #f7f8fa;
+  color: #394150;
+  padding: 6px 9px;
+  font-size: 12px;
+}
+
+.context-readiness {
+  margin-bottom: 12px;
+  color: var(--muted);
+  font-size: 12px;
+  line-height: 1.45;
+}
+
+.hidden {
+  display: none;
+}
+
 .today-item strong {
   font-size: 14px;
 }
@@ -482,6 +567,16 @@ textarea {
   }
 
   .board-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .pdca-form-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .filter-panel,
+  .compact-filter,
+  .pdca-result-grid {
     grid-template-columns: 1fr;
   }
 

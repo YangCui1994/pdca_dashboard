@@ -19,6 +19,7 @@ app/backend/storage.py
 ```
 
 Markdown vault persistence. Creates task folders, reads/saves editable Markdown files, generates card summaries, and renders agent context.
+It also owns status moves, event appends, PDCA input/review logs, and context readiness checks.
 
 ```text
 app/backend/ai.py
@@ -42,20 +43,21 @@ app/frontend/app.js
 ```
 
 All-items board. Calls `/api/work-items` and renders status columns.
+Includes status/date/tag/blocker filters and status move actions.
 
 ```text
 app/frontend/today.html
 app/frontend/today.js
 ```
 
-Daily PDCA page. Shows this week's items and submits capture actions such as `pdca_gate`.
+Daily PDCA page. Shows today and this week's items separately, captures Plan/Do/Check/Act inputs, writes PDCA input logs, generates periodic reviews, and can append accepted analysis to a selected task's `events.md`.
 
 ```text
 app/frontend/detail.html
 app/frontend/detail.js
 ```
 
-Task detail editor. Edits `task.md`, `context.md`, `ai-notes.md`, and `events.md`. Can request `/api/agent-context`.
+Task document editor. The separate document pages edit `task.md`, `context.md`, `ai-notes.md`, and `events.md`. The task page can request `/api/agent-context`, copy/download the rendered context, and display `/api/context-readiness`.
 
 ```text
 app/frontend/styles.css
@@ -70,6 +72,11 @@ app/prompts/
 ```
 
 Prompt templates used by the app's AI actions.
+
+Important prompt files:
+
+- `pdca_gate.md`: single PDCA entry review and Do classification.
+- `pdca_periodic_review.md`: periodic review over `reviews/pdca-input-log.md`.
 
 ```text
 .agents/skills/pdca-gate/SKILL.md
@@ -94,6 +101,14 @@ data-issue-vault/inbox/2026-06-22-example-task/
   ai-notes.md
   events.md
   assets/
+```
+
+PDCA log/review files are local user data and should not be committed:
+
+```text
+data-issue-vault/reviews/
+  pdca-input-log.md
+  YYYY-MM-DD-HHMMSS-pdca-review.md
 ```
 
 ## Tests

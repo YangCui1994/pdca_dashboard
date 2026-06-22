@@ -4,6 +4,9 @@ const documentStatus = document.querySelector("#documentStatus");
 const documentEditor = document.querySelector("#documentEditor");
 const saveDocumentButton = document.querySelector("#saveDocumentButton");
 const documentNav = document.querySelector("#documentNav");
+const copyContextButton = document.querySelector("#copyContextButton");
+const downloadContextButton = document.querySelector("#downloadContextButton");
+const contextReadiness = document.querySelector("#contextReadiness");
 
 const params = new URLSearchParams(window.location.search);
 const workItemPath = params.get("path") || "";
@@ -57,6 +60,7 @@ async function loadDocument() {
   documentPath.textContent = `${currentItem.path}/${documentConfig.label}`;
   documentEditor.value = currentItem[documentConfig.field] || "";
   renderDocumentNav();
+  await loadContextReadiness();
   setDocumentStatus(`状态：${currentItem.status}`);
 }
 
@@ -86,8 +90,63 @@ async function saveDocument() {
   }
   currentItem[documentConfig.field] = documentEditor.value;
   setDocumentStatus("已保存。");
+  await loadContextReadiness();
+}
+
+async function fetchAgentContext() {
+  const response = await fetch(`/api/agent-context?path=${encodeURIComponent(workItemPath)}`);
+  if (!response.ok) {
+    throw new Error(`Agent Context 加载失败：${response.status}`);
+  }
+  const payload = await response.json();
+  return payload.context || "";
+}
+
+async function loadContextReadiness() {
+  if (!contextReadiness || !workItemPath) {
+    return;
+  }
+  const response = await fetch(`/api/context-readiness?path=${encodeURIComponent(workItemPath)}`);
+  if (!response.ok) {
+    contextReadiness.textContent = `Context readiness 加载失败：${response.status}`;
+    return;
+  }
+  const payload = await response.json();
+  const missing = payload.missing && payload.missing.length ? payload.missing.join("；") : "无缺口";
+  contextReadiness.textContent = `Agent Context ready: ${payload.ready ? "yes" : "no"} · ${missing}`;
+}
+
+async function copyAgentContext() {
+  try {
+    const context = await fetchAgentContext();
+    await navigator.clipboard.writeText(context);
+    setDocumentStatus("Agent Context 已复制。");
+  } catch (error) {
+    setDocumentStatus(error.message);
+  }
+}
+
+async function downloadAgentContext() {
+  try {
+    const context = await fetchAgentContext();
+    const blob = new Blob([context], {type: "text/markdown;charset=utf-8"});
+    const link = document.createElement("a");
+    link.href = URL.createObjectURL(blob);
+    link.download = `${currentItem.title || "agent-context"}-context.md`;
+    link.click();
+    URL.revokeObjectURL(link.href);
+    setDocumentStatus("Agent Context 已准备下载。");
+  } catch (error) {
+    setDocumentStatus(error.message);
+  }
 }
 
 saveDocumentButton.addEventListener("click", saveDocument);
+if (copyContextButton) {
+  copyContextButton.addEventListener("click", copyAgentContext);
+}
+if (downloadContextButton) {
+  downloadContextButton.addEventListener("click", downloadAgentContext);
+}
 renderDocumentNav();
 loadDocument();

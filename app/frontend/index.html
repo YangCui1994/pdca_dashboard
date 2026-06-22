@@ -46,6 +46,41 @@
             <div class="badges" id="vaultOverview"></div>
           </section>
 
+          <section class="panel filter-panel">
+            <label>
+              状态
+              <select id="statusFilter">
+                <option value="all">全部</option>
+                <option value="inbox">收件箱</option>
+                <option value="active">推进中</option>
+                <option value="waiting">等待</option>
+                <option value="done">完成</option>
+                <option value="archive">归档</option>
+              </select>
+            </label>
+            <label>
+              日期
+              <select id="dateFilter">
+                <option value="all">全部</option>
+                <option value="today">今天</option>
+                <option value="week">本周</option>
+                <option value="undated">无日期</option>
+              </select>
+            </label>
+            <label>
+              标签
+              <input id="tagFilter" type="text" placeholder="输入标签关键词">
+            </label>
+            <label>
+              卡点
+              <select id="blockerFilter">
+                <option value="all">全部</option>
+                <option value="blocked">有卡点</option>
+                <option value="ready">已有基础且无卡点</option>
+              </select>
+            </label>
+          </section>
+
           <section class="board-panel is-full">
             <div class="board-grid" id="boardGrid"></div>
           </section>

@@ -17,12 +17,15 @@
         </div>
         <div class="detail-actions">
           <button id="saveDocumentButton" type="button">保存 task.md</button>
+          <button id="copyContextButton" type="button">复制 Agent Context</button>
+          <button id="downloadContextButton" type="button">下载 Agent Context</button>
         </div>
       </header>
       <section class="document-grid">
         <aside class="quiet-sidebar" id="documentNav"></aside>
         <section class="document-panel">
           <div id="documentStatus" class="status-text">加载中。</div>
+          <div id="contextReadiness" class="context-readiness"></div>
           <textarea id="documentEditor" rows="30"></textarea>
         </section>
       </section>

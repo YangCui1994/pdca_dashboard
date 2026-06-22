@@ -121,6 +121,101 @@ class StorageTests(unittest.TestCase):
             self.assertEqual(summaries[0]["blocker"], "等待平台确认清洗口径。")
             self.assertEqual(summaries[0]["basis"], "已有 SQL 初稿。")
 
+    def test_list_work_item_summaries_uses_frontmatter_metadata(self):
+        with tempfile.TemporaryDirectory() as temp_dir:
+            storage = VaultStorage(Path(temp_dir))
+            folder = storage.save_capture(
+                Capture(title="炉温跳变", raw_text="数据跳变", tags=["sql", "pdca"]),
+                created="2026-06-17",
+            )
+            (folder / "task.md").write_text(
+                """---
+type: data-issue
+status: inbox
+created: 2026-06-18
+tags:
+  - sql
+  - pdca
+---
+
+# 炉温跳变
+
+## 当前卡点
+
+等待确认。
+""",
+                encoding="utf-8",
+            )
+            summary = storage.list_work_item_summaries()[0]
+            self.assertEqual(summary["created"], "2026-06-18")
+            self.assertEqual(summary["tags"], ["sql", "pdca"])
+
+    def test_move_work_item_status_moves_folder_between_status_columns(self):
+        with tempfile.TemporaryDirectory() as temp_dir:
+            storage = VaultStorage(Path(temp_dir))
+            folder = storage.save_capture(Capture(title="炉温跳变", raw_text="数据跳变"), created="2026-06-17")
+            moved = storage.move_work_item_status(folder, "active")
+            self.assertEqual(moved.parent.name, "active")
+            self.assertTrue((moved / "task.md").exists())
+            self.assertFalse(folder.exists())
+
+    def test_append_work_item_event_adds_markdown_event(self):
+        with tempfile.TemporaryDirectory() as temp_dir:
+            storage = VaultStorage(Path(temp_dir))
+            folder = storage.save_capture(Capture(title="炉温跳变", raw_text="数据跳变"), created="2026-06-17")
+            storage.append_work_item_event(folder, "PDCA Review\n\n- Plan: ok", created_at="2026-06-22T09:00:00")
+            events = (folder / "events.md").read_text(encoding="utf-8")
+            self.assertIn("## 2026-06-22T09:00:00", events)
+            self.assertIn("PDCA Review", events)
+
+    def test_context_readiness_reports_missing_context(self):
+        with tempfile.TemporaryDirectory() as temp_dir:
+            storage = VaultStorage(Path(temp_dir))
+            folder = storage.save_capture(Capture(title="炉温跳变", raw_text="数据跳变"), created="2026-06-17")
+            readiness = storage.context_readiness(folder)
+            self.assertFalse(readiness["ready"])
+            self.assertIn("context.md lacks non-heading context", readiness["missing"])
+            (folder / "context.md").write_text("字段口径来自平台文档。", encoding="utf-8")
+            (folder / "events.md").write_text("# Events\n\n- 2026-06-17 对比了 SQL。", encoding="utf-8")
+            ready = storage.context_readiness(folder)
+            self.assertTrue(ready["ready"])
+            self.assertEqual(ready["missing"], [])
+
+    def test_append_pdca_entry_writes_global_input_log(self):
+        with tempfile.TemporaryDirectory() as temp_dir:
+            storage = VaultStorage(Path(temp_dir))
+            log_path = storage.append_pdca_entry(
+                title="今日 PDCA 输入",
+                plan="完成 dashboard v1",
+                do="已经拆出四个输入框",
+                check="还没有跑测试",
+                act="补测试并收窄范围",
+                ai_output="Plan 过于 ambitious",
+                created_at="2026-06-22T10:30:00",
+            )
+            self.assertEqual(log_path, Path(temp_dir) / "reviews" / "pdca-input-log.md")
+            content = log_path.read_text(encoding="utf-8")
+            self.assertIn("## 2026-06-22T10:30:00 - 今日 PDCA 输入", content)
+            self.assertIn("### Plan\n\n完成 dashboard v1", content)
+            self.assertIn("### Do\n\n已经拆出四个输入框", content)
+            self.assertIn("### AI Analysis\n\nPlan 过于 ambitious", content)
+
+    def test_read_recent_pdca_entries_returns_latest_sections(self):
+        with tempfile.TemporaryDirectory() as temp_dir:
+            storage = VaultStorage(Path(temp_dir))
+            storage.append_pdca_entry("第一条", "p1", "d1", "c1", "a1", "ai1", created_at="2026-06-22T10:00:00")
+            storage.append_pdca_entry("第二条", "p2", "d2", "c2", "a2", "ai2", created_at="2026-06-22T11:00:00")
+            history = storage.read_recent_pdca_entries(limit=1)
+            self.assertNotIn("第一条", history)
+            self.assertIn("第二条", history)
+
+    def test_save_pdca_review_writes_timestamped_review_file(self):
+        with tempfile.TemporaryDirectory() as temp_dir:
+            storage = VaultStorage(Path(temp_dir))
+            review_path = storage.save_pdca_review("Plan 经常过大", created_at="2026-06-22T12:15:00")
+            self.assertEqual(review_path, Path(temp_dir) / "reviews" / "2026-06-22-121500-pdca-review.md")
+            self.assertEqual(review_path.read_text(encoding="utf-8"), "Plan 经常过大")
+
 
 from app.backend.ai import FakeAIProvider
 from app.backend.app_state import WorkbenchApp
@@ -174,6 +269,42 @@ class WorkbenchAppTests(unittest.TestCase):
             self.assertIn("[fake-ai]", content)
             self.assertIn("bias_or_judgment", content)
             self.assertIn("今日 PDCA 输入", content)
+
+    def test_analyze_pdca_entry_records_initial_thoughts_without_creating_task_card(self):
+        with tempfile.TemporaryDirectory() as temp_dir:
+            app = WorkbenchApp(vault_root=Path(temp_dir), ai_provider=FakeAIProvider())
+            result = app.analyze_pdca_entry(
+                title="今日 PDCA 输入",
+                plan="今天完成所有页面",
+                do="我觉得推进很慢",
+                check="没有量化证据",
+                act="拆成两个小动作",
+            )
+            self.assertIn("[fake-ai]", result["ai_output"])
+            self.assertEqual(result["log_path"], str(Path(temp_dir) / "reviews" / "pdca-input-log.md"))
+            self.assertEqual(app.list_work_item_summaries(), [])
+            self.assertIn("今天完成所有页面", Path(result["log_path"]).read_text(encoding="utf-8"))
+
+    def test_review_pdca_history_saves_periodic_review(self):
+        with tempfile.TemporaryDirectory() as temp_dir:
+            app = WorkbenchApp(vault_root=Path(temp_dir), ai_provider=FakeAIProvider())
+            app.analyze_pdca_entry("今日 PDCA 输入", "计划很大", "做了讨论", "没有检查", "明天再说")
+            result = app.review_pdca_history(limit=5)
+            self.assertIn("[fake-ai]", result["ai_output"])
+            self.assertTrue(Path(result["review_path"]).exists())
+            self.assertIn("计划很大", Path(result["review_path"]).read_text(encoding="utf-8"))
+
+    def test_workbench_updates_status_appends_event_and_checks_context_readiness(self):
+        with tempfile.TemporaryDirectory() as temp_dir:
+            app = WorkbenchApp(vault_root=Path(temp_dir), ai_provider=FakeAIProvider())
+            result = app.capture_with_ai("数据跳变", "structure_capture", title="炉温跳变", kind="data-issue")
+            moved = app.move_work_item_status(result["path"], "active")
+            self.assertIn("/active/", moved["path"])
+            app.append_work_item_event(moved["path"], "PDCA Review\n\n- true_do: wrote tests")
+            item = app.get_work_item(moved["path"])
+            self.assertIn("true_do: wrote tests", item["events"])
+            readiness = app.context_readiness(moved["path"])
+            self.assertFalse(readiness["ready"])
 
 
 if __name__ == "__main__":

@@ -51,28 +51,101 @@
           <section class="today-grid">
             <section class="panel">
               <h2>今日/本周事项</h2>
-              <div id="todayList" class="today-list"></div>
+              <div class="filter-panel compact-filter">
+                <label>
+                  状态
+                  <select id="todayStatusFilter">
+                    <option value="all">全部</option>
+                    <option value="inbox">收件箱</option>
+                    <option value="active">推进中</option>
+                    <option value="waiting">等待</option>
+                    <option value="done">完成</option>
+                  </select>
+                </label>
+                <label>
+                  日期
+                  <input id="todayDateFilter" type="date">
+                </label>
+              </div>
+              <h3>今天</h3>
+              <div id="todayItems" class="today-list"></div>
+              <h3>本周</h3>
+              <div id="weekItems" class="today-list"></div>
+              <div id="todayList" class="today-list hidden"></div>
             </section>
             <section class="panel">
               <label>
                 标题
                 <input id="titleInput" type="text" value="今日 PDCA 输入">
               </label>
-              <label>
-                原始输入
-                <textarea id="rawInput" rows="14" placeholder="写下今天计划、已经做过的动作、观察到的结果、需要调整的下一步"></textarea>
-              </label>
+              <div class="pdca-form-grid">
+                <label>
+                  Plan
+                  <span class="field-note">写可验收的计划：目标、范围、完成标准。避免把愿望写成计划。</span>
+                  <textarea id="planInput" rows="7" placeholder="例：今天只完成 PDCA 输入日志 v1；验收标准是测试通过且页面可提交。"></textarea>
+                </label>
+                <label>
+                  Do
+                  <span class="field-note">只写已经发生、可验证的动作。不要混入“我觉得”“对方不配合”等判断。</span>
+                  <textarea id="doInput" rows="7" placeholder="例：已新增四个输入框的静态测试；已确认 /api/pdca-entry 红灯为 404。"></textarea>
+                </label>
+                <label>
+                  Check
+                  <span class="field-note">写证据、指标、反馈或对比。没有证据也要明确写“还没有证据”。</span>
+                  <textarea id="checkInput" rows="7" placeholder="例：storage 和 server 测试已通过；前端静态测试仍未通过。"></textarea>
+                </label>
+                <label>
+                  Act
+                  <span class="field-note">写下一步调整动作。保持小、具体、能在下一轮执行。</span>
+                  <textarea id="actInput" rows="7" placeholder="例：先改 today.js 接新 API，再跑完整测试。"></textarea>
+                </label>
+              </div>
               <div class="actions">
-                <button data-action="pdca_gate" type="button">PDCA Gate</button>
-                <button data-action="daily_review" type="button">生成日复盘</button>
-                <button data-action="structure_capture" type="button">整理成卡片</button>
+                <button id="analyzePdcaButton" type="button">AI 分析并记录</button>
+                <button id="reviewPdcaButton" type="button">生成周期 Review</button>
               </div>
               <div id="statusText" class="status-text">等待输入。</div>
+              <section class="pdca-result-grid" aria-label="PDCA Review Result">
+                <div>
+                  <h3>Plan</h3>
+                  <pre id="planResult"></pre>
+                </div>
+                <div>
+                  <h3>true Do</h3>
+                  <pre id="trueDoResult"></pre>
+                </div>
+                <div>
+                  <h3>candidate Do</h3>
+                  <pre id="candidateDoResult"></pre>
+                </div>
+                <div>
+                  <h3>not Do / judgment</h3>
+                  <pre id="notDoResult"></pre>
+                </div>
+                <div>
+                  <h3>Check</h3>
+                  <pre id="checkResult"></pre>
+                </div>
+                <div>
+                  <h3>Act</h3>
+                  <pre id="actResult"></pre>
+                </div>
+              </section>
               <label>
-                AI 输出
+                单次 AI 分析
                 <textarea id="aiOutput" rows="16"></textarea>
               </label>
               <div class="saved-path" id="savedPath"></div>
+              <label>
+                保存到任务事件
+                <select id="targetTaskSelect"></select>
+              </label>
+              <button id="acceptPdcaButton" type="button">保存分析到 events.md</button>
+              <label>
+                周期 Review
+                <textarea id="reviewOutput" rows="12"></textarea>
+              </label>
+              <div class="saved-path" id="reviewPath"></div>
             </section>
           </section>
         </div>

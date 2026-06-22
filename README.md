@@ -23,22 +23,27 @@ Use `--provider fake` when setting up a new machine or when the available model 
 python3 -m unittest discover -s tests -p 'test_*.py' -v
 ```
 
-Expected result at the time of this handoff: 30 tests passing.
+Expected result at the time of this handoff: the full suite should pass with zero failures.
 
 ## What Is Implemented
 
 - Capture raw input and save it as a Markdown task folder.
 - Run prompt actions through a provider abstraction.
 - `pdca_gate` prompt for classifying Plan/Do/Check/Act and detecting judgment disguised as Do.
+- Four-box PDCA input on `/today.html` with:
+  - Plan / Do / Check / Act fields.
+  - single-entry AI analysis written to `data-issue-vault/reviews/pdca-input-log.md`.
+  - manual periodic review files under `data-issue-vault/reviews/`.
+  - accepted analysis appended to a selected task folder's `events.md`.
 - Editable task detail page with:
   - `task.md`
   - `context.md`
   - `ai-notes.md`
   - `events.md`
   - `assets/`
-- All-items card board grouped by vault status.
-- Daily PDCA page for today/week-scale input.
-- Agent context rendering for downstream agents.
+- All-items card board grouped by vault status, with filters and status move actions.
+- Daily PDCA page for today/week-scale input, with today/week sections.
+- Agent context rendering, copy/download actions, and context readiness checks for downstream agents.
 - Project-local `pdca-gate` skill in `.agents/skills/pdca-gate/SKILL.md`.
 
 ## Repository Data Policy

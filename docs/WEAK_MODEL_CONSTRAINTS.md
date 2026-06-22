@@ -36,12 +36,16 @@ For backend changes:
 - Workflow action changes go in `app/backend/app_state.py`.
 - HTTP route changes go in `app/backend/server.py`.
 - Prompt files go in `app/prompts/`.
+- Status moves use `/api/work-item-status`.
+- Appending accepted PDCA analysis to a task uses `/api/work-item-event`.
+- Agent context readiness uses `/api/context-readiness`.
+- Do not hand-edit the PDCA input log format unless tests are updated first.
 
 For frontend changes:
 
 - All-items board: `app/frontend/index.html` and `app/frontend/app.js`.
 - Daily PDCA page: `app/frontend/today.html` and `app/frontend/today.js`.
-- Detail editor: `app/frontend/detail.html` and `app/frontend/detail.js`.
+- Task document pages: `app/frontend/task.html`, `context.html`, `events.html`, `ai-notes.html`, and `document.js`.
 - Shared visual rules: `app/frontend/styles.css`.
 
 For agent behavior:
@@ -78,6 +82,7 @@ Flag unsupported judgments with:
 ## Common Mistakes To Avoid
 
 - Do not overwrite `data-issue-vault` with sample data.
+- Do not display `data-issue-vault/reviews/pdca-input-log.md` on the dashboard; it stores private initial thoughts.
 - Do not remove legacy single Markdown file support from storage.
 - Do not rename API fields casually; frontend tests depend on them.
 - Do not treat design demos as production code.

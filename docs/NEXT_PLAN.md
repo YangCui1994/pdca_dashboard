@@ -2,76 +2,45 @@
 
 Current date: 2026-06-22.
 
-This project is now ready to sync to GitHub as a portable local-first codebase. The next work should proceed in small stages.
+The project is now complete through the pre-Round-Table handoff point. The next major stage is to design the Round Table interface, but do not implement simulated multi-agent debate until the user explicitly asks for it.
 
-## Stage 1: GitHub Sync And Portability
+## Completed Before Round Table
 
-Goal: make the repository usable on another computer by a weaker model.
+### Stage 1: GitHub Sync And Portability
 
-Checklist:
+- Code, docs, tests, design demos, project instructions, and project-local skills are intended to be tracked.
+- Real `data-issue-vault/` content is ignored; only skeleton `.gitkeep` files should be tracked.
+- Clone/run instructions live in `README.md` and `docs/GITHUB_SYNC.md`.
+- Weak-model operating rules live in `docs/WEAK_MODEL_CONSTRAINTS.md`.
 
-- Track code, docs, project-local skills, tests, and design demos.
-- Do not track real `data-issue-vault/` content.
-- Confirm clone/run instructions in `README.md`.
-- Confirm weak-model constraints in `docs/WEAK_MODEL_CONSTRAINTS.md`.
-- Push branch to GitHub.
+### Stage 2: Daily PDCA Page
 
-## Stage 2: Daily PDCA Page
+- `/today.html` is the strict time-scale PDCA entry.
+- It separates today and this-week items.
+- It includes status/date filters.
+- It has four input boxes: Plan, Do, Check, Act.
+- Single-entry AI analysis is recorded to `data-issue-vault/reviews/pdca-input-log.md`.
+- Manual periodic review generates timestamped files in `data-issue-vault/reviews/`.
+- The PDCA result UI separates Plan, true Do, candidate Do, not Do / judgment, Check, and Act.
+- Accepted PDCA analysis can be appended to a selected task folder's `events.md`.
 
-Goal: make `/today.html` the strict time-scale PDCA entry.
+### Stage 3: All-Items Board
 
-Build next:
+- `/` is the all-items card board.
+- It shows card status columns.
+- Cards expose current blocker, existing basis, latest event, created date, and tags.
+- It includes status/date/tag/blocker filters.
+- It includes status move actions.
+- Empty columns render explicit empty states.
 
-- Show today and this week sections separately.
-- Add date/status filters.
-- Add a PDCA review result section that separates:
-  - Plan
-  - true Do
-  - candidate Do
-  - not Do / judgment
-  - Check
-  - Act
-- Save accepted PDCA review output into the task folder's `events.md`.
+### Stage 4: Agent Context
 
-Stop before:
+- Each task folder has separate document pages for `task.md`, `context.md`, `events.md`, and `ai-notes.md`.
+- Rendered Agent Context includes task metadata, files, assets, and context readiness.
+- Task page can copy/download rendered Agent Context.
+- `/api/context-readiness` reports missing context before a downstream agent starts.
 
-- Calendar sync.
-- Notifications.
-- Drag-and-drop scheduling.
-
-## Stage 3: All-Items Board
-
-Goal: make `/` useful for scanning all active work.
-
-Build next:
-
-- Better summary extraction from frontmatter and sections.
-- Status move actions.
-- Card filters for status, date, tag, and blocker.
-- Clear empty states for each column.
-
-Stop before:
-
-- Drag-and-drop.
-- Multi-user collaboration.
-- Database migration.
-
-## Stage 4: Agent Context
-
-Goal: let an agent reliably pick up one task folder.
-
-Build next:
-
-- Add a copy/download action for rendered agent context.
-- Include file metadata and known missing context.
-- Add a "context readiness" check.
-
-Stop before:
-
-- Automatic long-running agents.
-- External model orchestration.
-
-## Stage 5: Round Table Interface
+## Next Stage: Round Table Interface
 
 Goal: leave a clean interface for future multi-agent decisions.
 

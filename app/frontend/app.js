@@ -5,6 +5,10 @@ const vaultOverview = document.querySelector("#vaultOverview");
 const boardCallouts = document.querySelector("#boardCallouts");
 const totalCount = document.querySelector("#totalCount");
 const progressFill = document.querySelector("#progressFill");
+const statusFilter = document.querySelector("#statusFilter");
+const dateFilter = document.querySelector("#dateFilter");
+const tagFilter = document.querySelector("#tagFilter");
+const blockerFilter = document.querySelector("#blockerFilter");
 
 const boardStatuses = ["inbox", "active", "waiting", "done", "archive"];
 const statusLabels = {
@@ -14,6 +18,8 @@ const statusLabels = {
   done: "完成",
   archive: "归档"
 };
+
+let allItems = [];
 
 function detailUrl(path) {
   return `/task.html?path=${encodeURIComponent(path)}`;
@@ -26,9 +32,52 @@ function emptyText(value, fallback) {
 async function refreshBoard() {
   const response = await fetch("/api/work-items");
   const payload = await response.json();
-  const items = payload.items || [];
+  allItems = payload.items || [];
+  applyFilters();
+}
+
+function applyFilters() {
+  const items = allItems.filter((item) => {
+    const statusMatch = statusFilter.value === "all" || item.status === statusFilter.value;
+    const dateMatch = matchesDateFilter(item.created, dateFilter.value);
+    const tagQuery = tagFilter.value.trim().toLowerCase();
+    const tags = item.tags || [];
+    const tagMatch = !tagQuery || tags.some((tag) => tag.toLowerCase().includes(tagQuery));
+    const blockerMatch =
+      blockerFilter.value === "all" ||
+      (blockerFilter.value === "blocked" && Boolean(item.blocker)) ||
+      (blockerFilter.value === "ready" && Boolean(item.basis) && !item.blocker);
+    return statusMatch && dateMatch && tagMatch && blockerMatch;
+  });
   renderOverview(items);
   renderBoard(items);
+}
+
+function matchesDateFilter(dateText, filterValue) {
+  if (filterValue === "all") {
+    return true;
+  }
+  if (!dateText) {
+    return filterValue === "undated";
+  }
+  if (filterValue === "today") {
+    return dateText === new Date().toISOString().slice(0, 10);
+  }
+  if (filterValue === "week") {
+    return isThisWeek(dateText);
+  }
+  return true;
+}
+
+function isThisWeek(dateText) {
+  const itemDate = new Date(`${dateText}T00:00:00`);
+  const now = new Date();
+  const start = new Date(now);
+  start.setDate(now.getDate() - now.getDay() + 1);
+  start.setHours(0, 0, 0, 0);
+  const end = new Date(start);
+  end.setDate(start.getDate() + 7);
+  return itemDate >= start && itemDate < end;
 }
 
 function groupItems(items) {
@@ -98,12 +147,15 @@ function renderBoard(items) {
     const cards = document.createElement("div");
     cards.className = "board-cards";
     for (const item of grouped[status]) {
-      const card = document.createElement("a");
+      const card = document.createElement("article");
       card.className = "board-card";
-      card.href = detailUrl(item.path);
 
+      const link = document.createElement("a");
+      link.href = detailUrl(item.path);
+      link.className = "board-card-title";
       const title = document.createElement("h2");
       title.textContent = item.title;
+      link.appendChild(title);
 
       const blocker = document.createElement("p");
       blocker.className = "board-card-blocker";
@@ -115,13 +167,54 @@ function renderBoard(items) {
       const event = document.createElement("p");
       event.textContent = `最近：${emptyText(item.last_event, "暂无事件")}`;
 
-      card.append(title, blocker, basis, event);
+      const meta = document.createElement("p");
+      meta.textContent = `日期：${emptyText(item.created, "无日期")} · 标签：${(item.tags || []).join(", ") || "无"}`;
+
+      const statusActions = document.createElement("div");
+      statusActions.className = "card-status-actions";
+      for (const targetStatus of boardStatuses.filter((candidate) => candidate !== item.status)) {
+        const button = document.createElement("button");
+        button.type = "button";
+        button.dataset.path = item.path;
+        button.dataset.status = targetStatus;
+        button.textContent = statusLabels[targetStatus];
+        statusActions.appendChild(button);
+      }
+
+      card.append(link, blocker, basis, event, meta, statusActions);
       cards.appendChild(card);
+    }
+    if (!grouped[status].length) {
+      const empty = document.createElement("p");
+      empty.className = "empty-state";
+      empty.textContent = "这一列暂无事项。";
+      cards.appendChild(empty);
     }
     column.appendChild(cards);
     boardGrid.appendChild(column);
   }
 }
+
+async function moveWorkItemStatus(path, status) {
+  await fetch("/api/work-item-status", {
+    method: "POST",
+    headers: {"Content-Type": "application/json"},
+    body: JSON.stringify({path, status})
+  });
+  await refreshBoard();
+}
+
+for (const control of [statusFilter, dateFilter, tagFilter, blockerFilter]) {
+  control.addEventListener("input", applyFilters);
+}
+
+boardGrid.addEventListener("click", (event) => {
+  const button = event.target.closest("button[data-path][data-status]");
+  if (!button) {
+    return;
+  }
+  moveWorkItemStatus(button.dataset.path, button.dataset.status);
+});
 
 refreshItems.addEventListener("click", refreshBoard);
 refreshBoard();
