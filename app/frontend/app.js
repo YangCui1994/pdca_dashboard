@@ -16,7 +16,7 @@ const statusLabels = {
 };
 
 function detailUrl(path) {
-  return `/detail.html?path=${encodeURIComponent(path)}`;
+  return `/task.html?path=${encodeURIComponent(path)}`;
 }
 
 function emptyText(value, fallback) {

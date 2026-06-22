@@ -9,7 +9,7 @@ const todayCount = document.querySelector("#todayCount");
 const todayProgress = document.querySelector("#todayProgress");
 
 function detailUrl(path) {
-  return `/detail.html?path=${encodeURIComponent(path)}`;
+  return `/task.html?path=${encodeURIComponent(path)}`;
 }
 
 function isThisWeek(dateText) {

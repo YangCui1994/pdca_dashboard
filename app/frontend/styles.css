@@ -418,6 +418,21 @@ textarea {
   max-width: 1500px;
 }
 
+.document-grid {
+  display: grid;
+  grid-template-columns: 180px minmax(420px, 1fr);
+  gap: 14px;
+  margin: 0 auto;
+  max-width: 1500px;
+}
+
+.document-panel {
+  border: 1px solid #edf0f3;
+  border-radius: var(--radius-lg);
+  background: var(--panel);
+  padding: 18px;
+}
+
 .detail-editor,
 .detail-side {
   overflow: auto;
@@ -457,7 +472,8 @@ textarea {
   .quiet-topbar,
   .quiet-layout,
   .detail-header,
-  .detail-grid {
+  .detail-grid,
+  .document-grid {
     grid-template-columns: 1fr;
   }
 
