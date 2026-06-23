@@ -188,6 +188,13 @@ function renderBoard(items) {
         button.textContent = statusLabels[targetStatus];
         statusActions.appendChild(button);
       }
+      const deleteButton = document.createElement("button");
+      deleteButton.type = "button";
+      deleteButton.className = "danger-action";
+      deleteButton.dataset.path = item.path;
+      deleteButton.dataset.delete = "true";
+      deleteButton.textContent = "删除";
+      statusActions.appendChild(deleteButton);
 
       card.append(link, summary, blocker, event, meta, statusActions);
       cards.appendChild(card);
@@ -208,6 +215,18 @@ async function moveWorkItemStatus(path, status) {
     method: "POST",
     headers: {"Content-Type": "application/json"},
     body: JSON.stringify({path, status})
+  });
+  await refreshBoard();
+}
+
+async function deleteWorkItem(path) {
+  if (!confirm("确定删除这个任务吗？此操作不可撤销。")) {
+    return;
+  }
+  await fetch("/api/work-item-delete", {
+    method: "POST",
+    headers: {"Content-Type": "application/json"},
+    body: JSON.stringify({path})
   });
   await refreshBoard();
 }
@@ -253,6 +272,12 @@ for (const control of [statusFilter, dateFilter, tagFilter, blockerFilter]) {
 }
 
 boardGrid.addEventListener("click", (event) => {
+  const deleteButton = event.target.closest("button[data-delete][data-path]");
+  if (deleteButton) {
+    deleteWorkItem(deleteButton.dataset.path);
+    return;
+  }
+
   const button = event.target.closest("button[data-path][data-status]");
   if (!button) {
     return;

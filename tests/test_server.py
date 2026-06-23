@@ -104,6 +104,12 @@ class ServerRouteTests(unittest.TestCase):
                 readiness = self._get_json(f"{base_url}/api/context-readiness?path={encoded_path}")
                 self.assertFalse(readiness["ready"])
                 self.assertIn("missing", readiness)
+
+                deleted = self._post_json(f"{base_url}/api/work-item-delete", {"path": moved["path"]})
+                self.assertTrue(deleted["ok"])
+                self.assertFalse(Path(moved["path"]).exists())
+                summaries = self._get_json(f"{base_url}/api/work-items")
+                self.assertEqual(summaries["items"], [])
             finally:
                 server.shutdown()
                 server.server_close()

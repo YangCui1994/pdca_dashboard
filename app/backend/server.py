@@ -145,6 +145,11 @@ class WorkbenchHandler(SimpleHTTPRequestHandler):
             )
             self._send_json(result)
             return
+        if parsed.path == "/api/work-item-delete":
+            payload = self._read_json()
+            result = self.app_state.delete_work_item(path=payload.get("path", ""))
+            self._send_json(result)
+            return
         if parsed.path == "/api/work-item-event":
             payload = self._read_json()
             result = self.app_state.append_work_item_event(

@@ -108,6 +108,10 @@ class WorkbenchApp:
         moved = self.storage.move_work_item_status(path, status)
         return {"path": str(moved)}
 
+    def delete_work_item(self, path: str) -> dict[str, bool]:
+        self.storage.delete_work_item(path)
+        return {"ok": True}
+
     def append_work_item_event(self, path: str, event: str) -> dict[str, str]:
         events_path = self.storage.append_work_item_event(path, event)
         return {"path": str(events_path), "ok": True}

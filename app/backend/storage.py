@@ -164,6 +164,13 @@ Missing:
         shutil.move(str(item_path), str(target))
         return target
 
+    def delete_work_item(self, path: Path | str) -> None:
+        item_path = self._resolve_work_item(path)
+        if item_path.is_dir():
+            shutil.rmtree(item_path)
+            return
+        item_path.unlink()
+
     def append_work_item_event(self, path: Path | str, event: str, created_at: str | None = None) -> Path:
         item_path = self._resolve_work_item(path)
         if not item_path.is_dir():
