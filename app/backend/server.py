@@ -133,6 +133,10 @@ class WorkbenchHandler(SimpleHTTPRequestHandler):
         relative = parsed.path.lstrip("/") or "index.html"
         return str(self.static_root / relative)
 
+    def end_headers(self) -> None:
+        self.send_header("Cache-Control", "no-store")
+        super().end_headers()
+
     def _read_json(self) -> dict:
         length = int(self.headers.get("Content-Length", "0"))
         raw = self.rfile.read(length).decode("utf-8")

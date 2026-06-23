@@ -132,6 +132,23 @@ class ServerRouteTests(unittest.TestCase):
                 server.shutdown()
                 server.server_close()
 
+    def test_static_assets_with_cache_busting_are_served_without_cache(self):
+        with tempfile.TemporaryDirectory() as temp_dir:
+            app = WorkbenchApp(vault_root=Path(temp_dir), ai_provider=FakeAIProvider())
+            server = self._start_server(app)
+            try:
+                base_url = f"http://127.0.0.1:{server.server_port}"
+                css_body, css_headers = self._get_text_response(f"{base_url}/styles.css?v=test-cache")
+                js_body, js_headers = self._get_text_response(f"{base_url}/app.js?v=test-cache")
+
+                self.assertIn(".quiet-shell", css_body)
+                self.assertIn("refreshBoard", js_body)
+                self.assertEqual(css_headers.get("Cache-Control"), "no-store")
+                self.assertEqual(js_headers.get("Cache-Control"), "no-store")
+            finally:
+                server.shutdown()
+                server.server_close()
+
     def _start_server(self, app: WorkbenchApp) -> ThreadingHTTPServer:
         class TestHandler(WorkbenchHandler):
             pass
@@ -146,6 +163,10 @@ class ServerRouteTests(unittest.TestCase):
     def _get_json(self, url: str) -> dict:
         with urlopen(url) as response:
             return json.loads(response.read().decode("utf-8"))
+
+    def _get_text_response(self, url: str) -> tuple[str, object]:
+        with urlopen(url) as response:
+            return response.read().decode("utf-8"), response.headers
 
     def _post_json(self, url: str, payload: dict) -> dict:
         request = Request(
