@@ -1,4 +1,5 @@
 const boardGrid = document.querySelector("#boardGrid");
+const showNewTaskButton = document.querySelector("#showNewTaskButton");
 const refreshItems = document.querySelector("#refreshItems");
 const statusOverview = document.querySelector("#statusOverview");
 const vaultOverview = document.querySelector("#vaultOverview");
@@ -240,6 +241,11 @@ async function createTask(event) {
   window.location.href = detailUrl(payload.path);
 }
 
+function focusNewTaskForm() {
+  newTaskForm.scrollIntoView({behavior: "smooth", block: "start"});
+  newTaskTitle.focus();
+}
+
 for (const control of [statusFilter, dateFilter, tagFilter, blockerFilter]) {
   control.addEventListener("input", applyFilters);
 }
@@ -253,5 +259,6 @@ boardGrid.addEventListener("click", (event) => {
 });
 
 newTaskForm.addEventListener("submit", createTask);
+showNewTaskButton.addEventListener("click", focusNewTaskForm);
 refreshItems.addEventListener("click", refreshBoard);
 refreshBoard();
