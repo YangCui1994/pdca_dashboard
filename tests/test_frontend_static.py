@@ -26,6 +26,7 @@ class FrontendStaticTests(unittest.TestCase):
         self.assertIn("newTaskInput", html)
         self.assertIn("createTaskButton", html)
         self.assertIn("showNewTaskButton", html)
+        self.assertLess(html.index("newTaskForm"), html.index("quiet-layout"))
         self.assertIn("/today.html", html)
         self.assertIn("/api/work-items", js)
         self.assertIn("/api/capture", js)

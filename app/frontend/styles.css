@@ -207,6 +207,22 @@ textarea {
   min-width: 0;
 }
 
+.quick-capture-panel {
+  margin: 0 auto 18px;
+  max-width: 1500px;
+}
+
+.new-task-form {
+  display: grid;
+  grid-template-columns: minmax(180px, 280px) minmax(320px, 1fr) auto;
+  gap: 12px;
+  align-items: end;
+}
+
+.new-task-form label {
+  margin-bottom: 0;
+}
+
 .panel,
 .progress-card,
 .callout-card,
@@ -679,6 +695,7 @@ textarea {
 
   .filter-panel,
   .compact-filter,
+  .new-task-form,
   .pdca-result-grid {
     grid-template-columns: 1fr;
   }
