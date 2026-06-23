@@ -38,6 +38,16 @@ class WorkbenchApp:
         path = self.storage.save_capture(capture, created=date.today().isoformat())
         return {"path": str(path), "ai_output": ai_output}
 
+    def capture_direct(
+        self,
+        raw_text: str,
+        title: str = "未命名输入",
+        kind: CaptureKind = "idea",
+    ) -> dict[str, str]:
+        capture = Capture(title=title, kind=kind, raw_text=raw_text)
+        path = self.storage.save_capture(capture, created=date.today().isoformat())
+        return {"path": str(path), "ai_output": ""}
+
     def analyze_pdca_entry(self, title: str, plan: str, do: str, check: str, act: str) -> dict[str, str]:
         raw_text = self._render_pdca_input(plan, do, check, act)
         prompt = render_prompt(PROMPT_MAP["pdca_gate"], raw_text)

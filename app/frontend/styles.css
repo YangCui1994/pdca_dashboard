@@ -142,6 +142,19 @@ textarea {
   align-items: center;
 }
 
+.inline-check {
+  display: inline-flex;
+  gap: 8px;
+  align-items: center;
+  margin-bottom: 0;
+  color: #4f5665;
+  white-space: nowrap;
+}
+
+.inline-check input {
+  width: auto;
+}
+
 .segmented-actions {
   border-radius: 999px;
   background: #e2e5eb;

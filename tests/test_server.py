@@ -132,6 +132,30 @@ class ServerRouteTests(unittest.TestCase):
                 server.shutdown()
                 server.server_close()
 
+    def test_capture_route_can_save_without_ai整理(self):
+        with tempfile.TemporaryDirectory() as temp_dir:
+            app = WorkbenchApp(vault_root=Path(temp_dir), ai_provider=FakeAIProvider())
+            server = self._start_server(app)
+            try:
+                base_url = f"http://127.0.0.1:{server.server_port}"
+                result = self._post_json(
+                    f"{base_url}/api/capture",
+                    {
+                        "title": "先记录原始任务",
+                        "raw_text": "只有一句模糊想法，先不要让 AI 发挥。",
+                        "kind": "task",
+                        "use_ai": False,
+                    },
+                )
+                task = Path(result["path"], "task.md").read_text(encoding="utf-8")
+                self.assertIn("只有一句模糊想法", task)
+                self.assertIn("尚未生成 AI 整理结果。", task)
+                self.assertNotIn("[fake-ai]", task)
+                self.assertEqual(result["ai_output"], "")
+            finally:
+                server.shutdown()
+                server.server_close()
+
     def test_static_assets_with_cache_busting_are_served_without_cache(self):
         with tempfile.TemporaryDirectory() as temp_dir:
             app = WorkbenchApp(vault_root=Path(temp_dir), ai_provider=FakeAIProvider())

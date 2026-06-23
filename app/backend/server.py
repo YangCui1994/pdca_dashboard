@@ -65,12 +65,19 @@ class WorkbenchHandler(SimpleHTTPRequestHandler):
         parsed = urlparse(self.path)
         if parsed.path == "/api/capture":
             payload = self._read_json()
-            result = self.app_state.capture_with_ai(
-                raw_text=payload.get("raw_text", ""),
-                action=payload.get("action", "structure_capture"),
-                title=payload.get("title", "未命名输入"),
-                kind=payload.get("kind", "idea"),
-            )
+            if payload.get("use_ai", True):
+                result = self.app_state.capture_with_ai(
+                    raw_text=payload.get("raw_text", ""),
+                    action=payload.get("action", "structure_capture"),
+                    title=payload.get("title", "未命名输入"),
+                    kind=payload.get("kind", "idea"),
+                )
+            else:
+                result = self.app_state.capture_direct(
+                    raw_text=payload.get("raw_text", ""),
+                    title=payload.get("title", "未命名输入"),
+                    kind=payload.get("kind", "idea"),
+                )
             self._send_json(result)
             return
         if parsed.path == "/api/pdca-entry":

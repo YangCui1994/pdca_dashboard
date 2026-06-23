@@ -13,6 +13,7 @@ const blockerFilter = document.querySelector("#blockerFilter");
 const newTaskForm = document.querySelector("#newTaskForm");
 const newTaskTitle = document.querySelector("#newTaskTitle");
 const newTaskInput = document.querySelector("#newTaskInput");
+const newTaskUseAi = document.querySelector("#newTaskUseAi");
 const newTaskStatus = document.querySelector("#newTaskStatus");
 const createTaskButton = document.querySelector("#createTaskButton");
 
@@ -219,7 +220,7 @@ async function createTask(event) {
     newTaskStatus.textContent = "请先输入内容";
     return;
   }
-  newTaskStatus.textContent = "AI 整理中";
+  newTaskStatus.textContent = newTaskUseAi.checked ? "AI 整理中" : "保存中";
   createTaskButton.disabled = true;
   const response = await fetch("/api/capture", {
     method: "POST",
@@ -228,7 +229,8 @@ async function createTask(event) {
       title,
       raw_text: rawText,
       action: "structure_capture",
-      kind: "task"
+      kind: "task",
+      use_ai: newTaskUseAi.checked
     })
   });
   createTaskButton.disabled = false;
