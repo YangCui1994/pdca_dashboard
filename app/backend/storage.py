@@ -62,10 +62,13 @@ class VaultStorage:
                     "status": item["status"],
                     "created": metadata.get("created", "") or self._created_from_path(Path(item["path"])),
                     "tags": metadata.get("tags", []),
-                    "blocker": self._extract_section_first_line(item["task"], "当前卡点"),
-                    "basis": self._extract_section_first_line(item["task"], "已有基础")
-                    or self._first_non_empty_line(item["context"]),
-                    "last_event": self._last_event_line(item.get("events", "")),
+                    "summary": self._card_summary(item["task"]),
+                    "blocker": self._short_text(self._extract_section_first_line(item["task"], "当前卡点")),
+                    "basis": self._short_text(
+                        self._extract_section_first_line(item["task"], "已有基础")
+                        or self._first_non_empty_line(item["context"])
+                    ),
+                    "last_event": self._short_text(self._last_event_line(item.get("events", ""))),
                 }
             )
         return summaries
@@ -301,6 +304,31 @@ Missing:
             if inside and stripped and not stripped.startswith("#"):
                 return stripped.removeprefix("- ").strip()
         return ""
+
+    def _card_summary(self, markdown: str) -> str:
+        metadata = self._frontmatter(markdown)
+        explicit_summary = metadata.get("summary", "")
+        if explicit_summary:
+            return self._short_text(explicit_summary)
+        for heading in ("摘要", "简述", "原始问题", "为什么值得做", "下一步动作"):
+            summary = self._extract_section_first_line(markdown, heading)
+            if summary:
+                return self._short_text(summary)
+        return self._short_text(self._first_non_empty_line(self._without_frontmatter(markdown)))
+
+    def _without_frontmatter(self, markdown: str) -> str:
+        if not markdown.startswith("---\n"):
+            return markdown
+        end = markdown.find("\n---", 4)
+        if end == -1:
+            return markdown
+        return markdown[end + 4 :].lstrip()
+
+    def _short_text(self, text: str, limit: int = 28) -> str:
+        clean = " ".join(text.split())
+        if len(clean) <= limit:
+            return clean
+        return f"{clean[:limit].rstrip()}..."
 
     def _first_non_empty_line(self, text: str) -> str:
         for line in text.splitlines():

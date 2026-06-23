@@ -25,6 +25,8 @@ class FrontendStaticTests(unittest.TestCase):
         self.assertIn("/api/work-items", js)
         self.assertIn("/api/work-item-status", js)
         self.assertIn("board-card-blocker", js)
+        self.assertIn("board-card-summary", js)
+        self.assertIn("item.summary", js)
         self.assertIn("applyFilters", js)
         self.assertIn("moveWorkItemStatus", js)
         self.assertIn("empty-state", js)
@@ -77,6 +79,10 @@ class FrontendStaticTests(unittest.TestCase):
             self.assertIn(f'data-document-kind="{document_kind}"', html)
             self.assertIn("/document.js", html)
             self.assertIn("documentEditor", html)
+            self.assertIn("documentPreview", html)
+            self.assertIn("helperInput", html)
+            self.assertIn("helperSkills", html)
+            self.assertIn("aiHelperButton", html)
 
         js = Path("app/frontend/document.js").read_text(encoding="utf-8")
         self.assertIn('task: {label: "task.md"', js)
@@ -88,6 +94,25 @@ class FrontendStaticTests(unittest.TestCase):
         self.assertIn("copyContextButton", Path("app/frontend/task.html").read_text(encoding="utf-8"))
         self.assertIn("downloadContextButton", Path("app/frontend/task.html").read_text(encoding="utf-8"))
         self.assertIn("contextReadiness", Path("app/frontend/task.html").read_text(encoding="utf-8"))
+
+    def test_document_pages_render_markdown_preview(self):
+        js = Path("app/frontend/document.js").read_text(encoding="utf-8")
+        self.assertIn("documentPreview", Path("app/frontend/task.html").read_text(encoding="utf-8"))
+        self.assertIn("markdown-preview", Path("app/frontend/task.html").read_text(encoding="utf-8"))
+        self.assertIn("renderMarkdownPreview", js)
+        self.assertIn("escapeHtml", js)
+        self.assertIn("documentEditor.addEventListener(\"input\"", js)
+
+    def test_document_pages_have_inline_ai_helper_contract(self):
+        html = Path("app/frontend/task.html").read_text(encoding="utf-8")
+        js = Path("app/frontend/document.js").read_text(encoding="utf-8")
+        self.assertIn("document-tabs", html)
+        self.assertNotIn("quiet-sidebar", html)
+        self.assertIn("helperDraft", html)
+        self.assertIn("applyDraftButton", html)
+        self.assertIn("/api/document-helper", js)
+        self.assertIn("runDocumentHelper", js)
+        self.assertIn("applyHelperDraft", js)
 
 
 if __name__ == "__main__":

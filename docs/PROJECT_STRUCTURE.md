@@ -13,6 +13,7 @@ app/backend/app_state.py
 ```
 
 Workflow layer. Registers prompt actions and delegates storage/AI provider work.
+It also builds document-helper prompts for unsaved AI Markdown drafts.
 
 ```text
 app/backend/storage.py
@@ -58,6 +59,7 @@ app/frontend/detail.js
 ```
 
 Task document editor. The separate document pages edit `task.md`, `context.md`, `ai-notes.md`, and `events.md`. The task page can request `/api/agent-context`, copy/download the rendered context, and display `/api/context-readiness`.
+Document pages show HTML rendered from Markdown first; the Markdown editor remains the source of truth.
 
 ```text
 app/frontend/styles.css
@@ -77,6 +79,7 @@ Important prompt files:
 
 - `pdca_gate.md`: single PDCA entry review and Do classification.
 - `pdca_periodic_review.md`: periodic review over `reviews/pdca-input-log.md`.
+- Document-helper prompts are generated in `app/backend/app_state.py` so the route can include the current document and user-requested skills.
 
 ```text
 .agents/skills/pdca-gate/SKILL.md

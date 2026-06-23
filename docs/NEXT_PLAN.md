@@ -1,8 +1,8 @@
 # Next Plan
 
-Current date: 2026-06-22.
+Current date: 2026-06-23.
 
-The project is now complete through the pre-Round-Table handoff point. The next major stage is to design the Round Table interface, but do not implement simulated multi-agent debate until the user explicitly asks for it.
+The project is now complete through the pre-Round-Table handoff point. The next practical stage is AI provider integration for the existing AI Helper/document workflow. Do not make broad architecture changes, and do not implement simulated multi-agent debate until the user explicitly asks for it.
 
 ## Completed Before Round Table
 
@@ -40,14 +40,17 @@ The project is now complete through the pre-Round-Table handoff point. The next 
 - Task page can copy/download rendered Agent Context.
 - `/api/context-readiness` reports missing context before a downstream agent starts.
 
-## Next Stage: Round Table Interface
+## Next Stage: AI Provider Integration
 
-Goal: leave a clean interface for future multi-agent decisions.
+Goal: connect a real provider behind the existing `AIProvider` abstraction and make AI-generated Markdown drafts useful in the current document-helper flow.
 
 Build next:
 
-- Define a decision request data shape.
-- Define roles and review outputs.
-- Save Round Table outputs as Markdown.
+- Verify the intended runtime provider: Hermes, local CLI, or another explicit command-line provider.
+- Keep `FakeAIProvider` as the default safe setup/testing provider.
+- Add or adjust provider error handling in `app/backend/ai.py`.
+- Ensure `/api/document-helper` returns a draft only and never writes task files before user confirmation.
+- Improve prompts so AI returns complete Markdown, including a short `summary:` when editing `task.md`.
+- Add tests for provider selection, failure behavior, and document-helper output.
 
-Stop here until the user explicitly asks to implement multi-agent debate. The current project should not simulate a real Round Table with one weak model and pretend it is multiple independent agents.
+Stop here until the user explicitly asks for broader structure changes. Round Table interface work can wait; the current priority is making one real provider produce useful, reviewable Markdown output.

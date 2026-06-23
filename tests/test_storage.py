@@ -121,6 +121,48 @@ class StorageTests(unittest.TestCase):
             self.assertEqual(summaries[0]["blocker"], "等待平台确认清洗口径。")
             self.assertEqual(summaries[0]["basis"], "已有 SQL 初稿。")
 
+    def test_list_work_item_summaries_returns_short_card_summary(self):
+        with tempfile.TemporaryDirectory() as temp_dir:
+            storage = VaultStorage(Path(temp_dir))
+            folder = storage.save_capture(Capture(title="炉温跳变", raw_text="数据跳变"), created="2026-06-17")
+            storage.save_work_item(
+                folder,
+                task=(
+                    "---\n"
+                    "type: data-issue\n"
+                    "status: inbox\n"
+                    "created: 2026-06-17\n"
+                    "summary: 炉温口径复核\n"
+                    "---\n\n"
+                    "# 炉温跳变\n\n"
+                    "这是一段很长的任务叙述，主页不应该直接展示整段正文。"
+                ),
+                context="",
+                ai_notes="",
+                events="# Events\n\n",
+            )
+            summary = storage.list_work_item_summaries()[0]
+            self.assertEqual(summary["summary"], "炉温口径复核")
+
+    def test_list_work_item_summaries_falls_back_to_truncated_body_summary(self):
+        with tempfile.TemporaryDirectory() as temp_dir:
+            storage = VaultStorage(Path(temp_dir))
+            folder = storage.save_capture(Capture(title="长任务", raw_text="x"), created="2026-06-17")
+            storage.save_work_item(
+                folder,
+                task=(
+                    "# 长任务\n\n"
+                    "这是一个特别长的主页说明，包含很多背景、原因、证据、下一步动作和验收口径，"
+                    "但看板卡片只应该给出一段短描述。"
+                ),
+                context="",
+                ai_notes="",
+                events="# Events\n\n",
+            )
+            summary = storage.list_work_item_summaries()[0]["summary"]
+            self.assertLessEqual(len(summary), 31)
+            self.assertTrue(summary.endswith("..."))
+
     def test_list_work_item_summaries_uses_frontmatter_metadata(self):
         with tempfile.TemporaryDirectory() as temp_dir:
             storage = VaultStorage(Path(temp_dir))
@@ -254,6 +296,24 @@ class WorkbenchAppTests(unittest.TestCase):
             self.assertIn("任务正文", context)
             self.assertIn("上下文资料", context)
             self.assertIn("AI 记录", context)
+
+    def test_document_helper_returns_draft_without_saving(self):
+        with tempfile.TemporaryDirectory() as temp_dir:
+            app = WorkbenchApp(vault_root=Path(temp_dir), ai_provider=FakeAIProvider())
+            result = app.capture_with_ai("数据跳变", "structure_capture", title="炉温跳变", kind="data-issue")
+            path = result["path"]
+            before = Path(path, "task.md").read_text(encoding="utf-8")
+            helper = app.draft_document_update(
+                path=path,
+                document="task",
+                instruction="压缩成一个可执行任务",
+                skills="pdca-gate, stock-analysis",
+            )
+            after = Path(path, "task.md").read_text(encoding="utf-8")
+            self.assertEqual(after, before)
+            self.assertIn("[fake-ai]", helper["draft"])
+            self.assertIn("pdca-gate, stock-analysis", helper["draft"])
+            self.assertIn("压缩成一个可执行任务", helper["draft"])
 
     def test_capture_with_pdca_gate_action_saves_ai_output(self):
         with tempfile.TemporaryDirectory() as temp_dir:

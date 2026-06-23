@@ -161,8 +161,9 @@ function renderBoard(items) {
       blocker.className = "board-card-blocker";
       blocker.textContent = `卡点：${emptyText(item.blocker, "未填写")}`;
 
-      const basis = document.createElement("p");
-      basis.textContent = `基础：${emptyText(item.basis, "未填写")}`;
+      const summary = document.createElement("p");
+      summary.className = "board-card-summary";
+      summary.textContent = `摘要：${emptyText(item.summary, item.basis || "未填写")}`;
 
       const event = document.createElement("p");
       event.textContent = `最近：${emptyText(item.last_event, "暂无事件")}`;
@@ -181,7 +182,7 @@ function renderBoard(items) {
         statusActions.appendChild(button);
       }
 
-      card.append(link, blocker, basis, event, meta, statusActions);
+      card.append(link, summary, blocker, event, meta, statusActions);
       cards.appendChild(card);
     }
     if (!grouped[status].length) {

@@ -108,6 +108,30 @@ class ServerRouteTests(unittest.TestCase):
                 server.shutdown()
                 server.server_close()
 
+    def test_document_helper_route_returns_unsaved_draft(self):
+        with tempfile.TemporaryDirectory() as temp_dir:
+            app = WorkbenchApp(vault_root=Path(temp_dir), ai_provider=FakeAIProvider())
+            folder = app.storage.save_capture(Capture(title="炉温跳变", raw_text="数据跳变"), created="2026-06-17")
+            before = (folder / "task.md").read_text(encoding="utf-8")
+            server = self._start_server(app)
+            try:
+                base_url = f"http://127.0.0.1:{server.server_port}"
+                helper = self._post_json(
+                    f"{base_url}/api/document-helper",
+                    {
+                        "path": str(folder),
+                        "document": "task",
+                        "instruction": "整理成更短的任务说明",
+                        "skills": "pdca-gate",
+                    },
+                )
+                self.assertIn("[fake-ai]", helper["draft"])
+                self.assertIn("整理成更短的任务说明", helper["draft"])
+                self.assertEqual((folder / "task.md").read_text(encoding="utf-8"), before)
+            finally:
+                server.shutdown()
+                server.server_close()
+
     def _start_server(self, app: WorkbenchApp) -> ThreadingHTTPServer:
         class TestHandler(WorkbenchHandler):
             pass

@@ -11,6 +11,25 @@ This file is for agents using weaker models such as DeepSeek, GLM, Minimax, or s
 5. Do not introduce a database, Node build step, React/Vue app, or package manager.
 6. Keep the app runnable with `python3 -m app.backend.server --provider fake --port 8765`.
 7. Do not sync real `data-issue-vault/` content to GitHub.
+8. The main future task for weak models is AI provider wiring and AI output handling, not broad code structure changes.
+
+## Current Weak-Model Scope
+
+The app structure is intentionally stable. Do not refactor the backend/frontend layout, replace the Markdown vault, add a build step, or redesign routing unless the user explicitly asks for that specific change.
+
+Expected weak-model work:
+
+- Connect or adjust an AI provider behind `app/backend/ai.py`.
+- Keep `/api/document-helper` as a draft-only flow: AI returns Markdown, the user reviews it, then the user saves it.
+- Improve prompt text or provider error messages when needed.
+- Add focused tests for provider selection, route behavior, and draft output.
+
+Out of scope unless explicitly requested:
+
+- Replacing the Python standard-library server.
+- Adding a database or syncing real vault contents.
+- Moving to React/Vue or adding a Node build pipeline.
+- Simulating multi-agent Round Table behavior with one weak model.
 
 ## Safe Test Command
 

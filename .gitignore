@@ -29,3 +29,6 @@ data-issue-vault/**/*
 
 # Local agent scratch space
 .scratch/
+
+# Local code intelligence index
+.codegraph/

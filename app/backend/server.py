@@ -85,6 +85,16 @@ class WorkbenchHandler(SimpleHTTPRequestHandler):
             )
             self._send_json({"ok": True})
             return
+        if parsed.path == "/api/document-helper":
+            payload = self._read_json()
+            result = self.app_state.draft_document_update(
+                path=payload.get("path", ""),
+                document=payload.get("document", "task"),
+                instruction=payload.get("instruction", ""),
+                skills=payload.get("skills", ""),
+            )
+            self._send_json(result)
+            return
         if parsed.path == "/api/work-item-status":
             payload = self._read_json()
             result = self.app_state.move_work_item_status(

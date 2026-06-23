@@ -41,6 +41,8 @@ Expected result at the time of this handoff: the full suite should pass with zer
   - `ai-notes.md`
   - `events.md`
   - `assets/`
+- HTML-first document pages with Markdown as the source of truth.
+- Document AI Helper flow that returns unsaved Markdown drafts for user review before saving.
 - All-items card board grouped by vault status, with filters and status move actions.
 - Daily PDCA page for today/week-scale input, with today/week sections.
 - Agent context rendering, copy/download actions, and context readiness checks for downstream agents.

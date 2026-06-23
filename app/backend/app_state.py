@@ -71,6 +71,26 @@ class WorkbenchApp:
     def save_work_item(self, path: str, task: str, context: str, ai_notes: str, events: str = "") -> None:
         self.storage.save_work_item(path, task=task, context=context, ai_notes=ai_notes, events=events)
 
+    def draft_document_update(self, path: str, document: str, instruction: str, skills: str = "") -> dict[str, str]:
+        item = self.storage.read_work_item(path)
+        document_fields = {
+            "task": "task",
+            "context": "context",
+            "events": "events",
+            "ai-notes": "ai_notes",
+        }
+        if document not in document_fields:
+            raise ValueError(f"Unsupported document: {document}")
+        current_markdown = item[document_fields[document]]
+        prompt = self._render_document_helper_prompt(
+            title=item["title"],
+            document=document,
+            current_markdown=current_markdown,
+            instruction=instruction,
+            skills=skills,
+        )
+        return {"draft": self.ai_provider.complete(prompt)}
+
     def render_agent_context(self, path: str) -> str:
         return self.storage.render_agent_context(path)
 
@@ -103,4 +123,35 @@ class WorkbenchApp:
 ## Act
 
 {act}
+"""
+
+    def _render_document_helper_prompt(
+        self,
+        title: str,
+        document: str,
+        current_markdown: str,
+        instruction: str,
+        skills: str,
+    ) -> str:
+        return f"""你是 Quiet Workbench 的文档整理助手。
+
+请只输出更新后的 Markdown，不要输出 HTML。HTML 预览会由系统从 Markdown 自动渲染。
+
+任务标题：{title}
+文档：{document}
+用户想使用的 skills / 辅助视角：{skills or "未指定"}
+用户输入或修改要求：
+{instruction}
+
+当前 Markdown：
+```markdown
+{current_markdown}
+```
+
+要求：
+- 保留事实，不要编造外部信息。
+- 如果用户只是补充新进展，把它整合进合适的小节。
+- 如果是 task.md，保持任务目标、卡点、已有基础、下一步、产出物清楚。
+- 如果需要首页短摘要，可在 frontmatter 中保留或新增一行 `summary: <不超过 20 字的一句话>`。
+- 输出完整 Markdown 草稿，等待用户确认后再保存。
 """

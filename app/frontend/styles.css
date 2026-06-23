@@ -386,6 +386,11 @@ textarea {
   overflow-wrap: anywhere;
 }
 
+.board-card-summary {
+  color: #343a46;
+  font-weight: 700;
+}
+
 .today-grid {
   display: grid;
   grid-template-columns: minmax(260px, 380px) minmax(420px, 1fr);
@@ -505,10 +510,10 @@ textarea {
 
 .document-grid {
   display: grid;
-  grid-template-columns: 180px minmax(420px, 1fr);
+  grid-template-columns: minmax(420px, 1fr);
   gap: 14px;
   margin: 0 auto;
-  max-width: 1500px;
+  max-width: 1180px;
 }
 
 .document-panel {
@@ -516,6 +521,103 @@ textarea {
   border-radius: var(--radius-lg);
   background: var(--panel);
   padding: 18px;
+}
+
+.document-tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 14px;
+}
+
+.document-tabs .nav-item {
+  border-radius: 999px;
+  padding: 8px 12px;
+}
+
+.markdown-preview {
+  min-height: 420px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-md);
+  background: #fbfcfd;
+  padding: 18px;
+  color: #262b35;
+  font-size: 14px;
+  line-height: 1.65;
+  overflow: auto;
+}
+
+.helper-panel {
+  display: grid;
+  gap: 12px;
+  margin-top: 14px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-md);
+  background: var(--soft-panel);
+  padding: 14px;
+}
+
+.helper-panel h2 {
+  margin: 0;
+  font-size: 15px;
+}
+
+.helper-panel label {
+  margin-bottom: 0;
+}
+
+.helper-panel textarea,
+.markdown-editor-details textarea {
+  min-height: 160px;
+}
+
+.markdown-editor-details {
+  margin-top: 14px;
+}
+
+.markdown-editor-details summary {
+  cursor: pointer;
+  color: #343a46;
+  font-size: 13px;
+  font-weight: 800;
+}
+
+.markdown-editor-details textarea {
+  margin-top: 12px;
+  min-height: 520px;
+}
+
+.markdown-preview h1,
+.markdown-preview h2,
+.markdown-preview h3,
+.markdown-preview h4 {
+  margin: 18px 0 8px;
+  line-height: 1.25;
+}
+
+.markdown-preview h1:first-child,
+.markdown-preview h2:first-child,
+.markdown-preview h3:first-child,
+.markdown-preview h4:first-child {
+  margin-top: 0;
+}
+
+.markdown-preview p,
+.markdown-preview ul,
+.markdown-preview pre {
+  margin: 0 0 12px;
+}
+
+.markdown-preview ul {
+  padding-left: 20px;
+}
+
+.markdown-preview pre {
+  overflow: auto;
+  border-radius: var(--radius-md);
+  background: #20232d;
+  padding: 12px;
+  color: #f8f9fb;
 }
 
 .detail-editor,
@@ -558,7 +660,8 @@ textarea {
   .quiet-layout,
   .detail-header,
   .detail-grid,
-  .document-grid {
+  .document-grid,
+  .document-workspace {
     grid-template-columns: 1fr;
   }
 

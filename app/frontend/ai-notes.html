@@ -20,10 +20,30 @@
         </div>
       </header>
       <section class="document-grid">
-        <aside class="quiet-sidebar" id="documentNav"></aside>
         <section class="document-panel">
+          <nav class="document-tabs" id="documentNav"></nav>
           <div id="documentStatus" class="status-text">加载中。</div>
-          <textarea id="documentEditor" rows="30"></textarea>
+          <article id="documentPreview" class="markdown-preview"></article>
+          <section class="helper-panel">
+            <h2>AI Helper</h2>
+            <label>
+              输入补充内容或修改要求
+              <textarea id="helperInput" rows="5" placeholder="写下新增事实、调整方向、想压缩/重组的地方"></textarea>
+            </label>
+            <label>
+              辅助 skills / 视角
+              <input id="helperSkills" placeholder="例如：pdca-gate, stock-analysis, risk-review">
+            </label>
+            <div class="actions">
+              <button id="aiHelperButton" type="button">AI Helper</button>
+              <button id="applyDraftButton" type="button">采用草稿</button>
+            </div>
+            <textarea id="helperDraft" rows="8" placeholder="AI 草稿会出现在这里；确认后再采用。"></textarea>
+          </section>
+          <details class="markdown-editor-details">
+            <summary>编辑 Markdown 原文</summary>
+            <textarea id="documentEditor" rows="30"></textarea>
+          </details>
         </section>
       </section>
     </main>

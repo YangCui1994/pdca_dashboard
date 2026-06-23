@@ -44,19 +44,30 @@ The default `python3 -m unittest discover -v` may find zero tests because this r
 
 - `/` is the all-items board.
 - `/today.html` is the daily/time-scale PDCA entry.
-- `/detail.html?path=...` edits one task folder.
+- `/task.html?path=...`, `/context.html?path=...`, `/events.html?path=...`, and `/ai-notes.html?path=...` display and edit task-folder Markdown documents.
 - `/api/work-items` returns card summaries.
 - `/api/capture` runs a prompt action and saves a task folder.
+- `/api/document-helper` returns an unsaved AI Markdown draft for the current document.
 - `/api/agent-context` renders `task.md`, `context.md`, `ai-notes.md`, `events.md`, and asset names for an agent.
 
 ## Agent Workflow Rules
 
 - Keep changes small and testable.
 - Prefer editing existing simple modules over adding frameworks.
+- For weak-model follow-up work, focus on wiring real AI providers and making AI output usable in the existing document-helper flow; do not redesign the app architecture.
+- Preserve the current stack: Python standard-library server, static frontend, Markdown vault, and provider abstraction in `app/backend/ai.py`.
 - When adding a new page, add a static frontend test in `tests/test_frontend_static.py`.
 - When changing storage shape, add tests in `tests/test_storage.py` and preserve legacy single-Markdown-file behavior.
 - When changing HTTP behavior, add tests in `tests/test_server.py`.
 - If a local server test binds a port and the sandbox blocks it, rerun with the required permission rather than skipping it.
+
+## GitHub Sync Rule
+
+- After each completed code or documentation update, sync the code changes to GitHub.
+- Before staging, committing, or pushing, inspect `git status --short` and ensure real task content under `data-issue-vault/` is not included.
+- Only sync code, tests, docs, design references, project instructions, project-local skills, and tracked vault skeleton files such as `.gitkeep`.
+- Do not sync concrete user task folders, PDCA logs, review files, assets, or generated local workbench data from `data-issue-vault/`.
+- If a change only updates local task content, do not push it to GitHub unless the user explicitly asks and confirms the exact files.
 
 ## Weak Model Handoff
 
