@@ -46,6 +46,29 @@
             <div class="badges" id="vaultOverview"></div>
           </section>
 
+          <section class="panel new-task-panel">
+            <div class="section-heading">
+              <div>
+                <p class="eyebrow">Capture</p>
+                <h2>新建任务</h2>
+              </div>
+              <strong id="newTaskStatus">未提交</strong>
+            </div>
+            <form id="newTaskForm" class="new-task-form">
+              <label>
+                标题
+                <input id="newTaskTitle" type="text" placeholder="例如：Tushare 数据 smoke test">
+              </label>
+              <label>
+                内容
+                <textarea id="newTaskInput" rows="5" placeholder="写下原始问题、已有基础、下一步或想让 AI 整理的碎片。"></textarea>
+              </label>
+              <div class="actions">
+                <button id="createTaskButton" type="submit">新建任务</button>
+              </div>
+            </form>
+          </section>
+
           <section class="panel filter-panel">
             <label>
               状态

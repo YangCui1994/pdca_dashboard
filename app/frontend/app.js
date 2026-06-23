@@ -9,6 +9,11 @@ const statusFilter = document.querySelector("#statusFilter");
 const dateFilter = document.querySelector("#dateFilter");
 const tagFilter = document.querySelector("#tagFilter");
 const blockerFilter = document.querySelector("#blockerFilter");
+const newTaskForm = document.querySelector("#newTaskForm");
+const newTaskTitle = document.querySelector("#newTaskTitle");
+const newTaskInput = document.querySelector("#newTaskInput");
+const newTaskStatus = document.querySelector("#newTaskStatus");
+const createTaskButton = document.querySelector("#createTaskButton");
 
 const boardStatuses = ["inbox", "active", "waiting", "done", "archive"];
 const statusLabels = {
@@ -205,6 +210,36 @@ async function moveWorkItemStatus(path, status) {
   await refreshBoard();
 }
 
+async function createTask(event) {
+  event.preventDefault();
+  const title = newTaskTitle.value.trim() || "未命名任务";
+  const rawText = newTaskInput.value.trim();
+  if (!rawText) {
+    newTaskStatus.textContent = "请先输入内容";
+    return;
+  }
+  newTaskStatus.textContent = "AI 整理中";
+  createTaskButton.disabled = true;
+  const response = await fetch("/api/capture", {
+    method: "POST",
+    headers: {"Content-Type": "application/json"},
+    body: JSON.stringify({
+      title,
+      raw_text: rawText,
+      action: "structure_capture",
+      kind: "task"
+    })
+  });
+  createTaskButton.disabled = false;
+  if (!response.ok) {
+    newTaskStatus.textContent = `创建失败：${response.status}`;
+    return;
+  }
+  const payload = await response.json();
+  newTaskStatus.textContent = "已创建";
+  window.location.href = detailUrl(payload.path);
+}
+
 for (const control of [statusFilter, dateFilter, tagFilter, blockerFilter]) {
   control.addEventListener("input", applyFilters);
 }
@@ -217,5 +252,6 @@ boardGrid.addEventListener("click", (event) => {
   moveWorkItemStatus(button.dataset.path, button.dataset.status);
 });
 
+newTaskForm.addEventListener("submit", createTask);
 refreshItems.addEventListener("click", refreshBoard);
 refreshBoard();
