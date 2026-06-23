@@ -47,3 +47,66 @@ class HermesCLIProvider:
             message = stderr or f"Hermes exited with code {completed.returncode}"
             raise RuntimeError(message)
         return completed.stdout.strip()
+
+
+@dataclass
+class CodexCLIProvider:
+    binary: str = "codex"
+    timeout_seconds: int = 180
+    model: str = ""
+    cwd: str = ""
+    sandbox: str = "read-only"
+    approval_policy: str = "never"
+    ephemeral: bool = True
+
+    def complete(self, prompt: str) -> str:
+        args = [self.binary, "exec"]
+        if self.cwd:
+            args.extend(["-C", self.cwd])
+        if self.sandbox:
+            args.extend(["--sandbox", self.sandbox])
+        if self.approval_policy:
+            args.extend(["--ask-for-approval", self.approval_policy])
+        if self.ephemeral:
+            args.append("--ephemeral")
+        if self.model:
+            args.extend(["--model", self.model])
+        args.append("-")
+        completed = subprocess.run(
+            args,
+            input=prompt,
+            check=False,
+            capture_output=True,
+            text=True,
+            timeout=self.timeout_seconds,
+        )
+        if completed.returncode != 0:
+            stderr = completed.stderr.strip()
+            message = stderr or f"Codex exited with code {completed.returncode}"
+            raise RuntimeError(message)
+        return completed.stdout.strip()
+
+
+@dataclass
+class OpenCodeCLIProvider:
+    binary: str = "opencode"
+    timeout_seconds: int = 180
+    model: str = ""
+
+    def complete(self, prompt: str) -> str:
+        args = [self.binary, "run"]
+        if self.model:
+            args.extend(["--model", self.model])
+        completed = subprocess.run(
+            args,
+            input=prompt,
+            check=False,
+            capture_output=True,
+            text=True,
+            timeout=self.timeout_seconds,
+        )
+        if completed.returncode != 0:
+            stderr = completed.stderr.strip()
+            message = stderr or f"OpenCode exited with code {completed.returncode}"
+            raise RuntimeError(message)
+        return completed.stdout.strip()

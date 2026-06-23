@@ -6,19 +6,33 @@ from http.server import SimpleHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
 from urllib.parse import parse_qs, urlparse
 
-from app.backend.ai import FakeAIProvider, HermesCLIProvider
+from app.backend.ai import CodexCLIProvider, FakeAIProvider, HermesCLIProvider, OpenCodeCLIProvider
 from app.backend.app_state import WorkbenchApp
 
 
 def build_ai_provider(
     name: str,
+    codex_binary: str = "codex",
+    codex_timeout: int = 180,
+    codex_model: str = "",
+    codex_cwd: str = "",
     hermes_binary: str = "hermes",
     hermes_timeout: int = 120,
     hermes_model: str = "",
     hermes_provider: str = "",
     hermes_toolsets: str = "",
     hermes_skills: str = "",
+    opencode_binary: str = "opencode",
+    opencode_timeout: int = 180,
+    opencode_model: str = "",
 ):
+    if name == "codex":
+        return CodexCLIProvider(
+            binary=codex_binary,
+            timeout_seconds=codex_timeout,
+            model=codex_model,
+            cwd=codex_cwd,
+        )
     if name == "hermes":
         return HermesCLIProvider(
             binary=hermes_binary,
@@ -30,6 +44,12 @@ def build_ai_provider(
         )
     if name == "fake":
         return FakeAIProvider()
+    if name == "opencode":
+        return OpenCodeCLIProvider(
+            binary=opencode_binary,
+            timeout_seconds=opencode_timeout,
+            model=opencode_model,
+        )
     raise ValueError(f"Unsupported provider: {name}")
 
 
@@ -174,13 +194,20 @@ def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("--host", default="127.0.0.1")
     parser.add_argument("--port", type=int, default=8765)
-    parser.add_argument("--provider", choices=["fake", "hermes"], default="fake")
+    parser.add_argument("--provider", choices=["fake", "codex", "hermes", "opencode"], default="fake")
+    parser.add_argument("--codex-binary", default="codex")
+    parser.add_argument("--codex-timeout", type=int, default=180)
+    parser.add_argument("--codex-model", default="")
+    parser.add_argument("--codex-cwd", default="")
     parser.add_argument("--hermes-binary", default="hermes")
     parser.add_argument("--hermes-timeout", type=int, default=120)
     parser.add_argument("--hermes-model", default="")
     parser.add_argument("--hermes-provider", default="")
     parser.add_argument("--hermes-toolsets", default="")
     parser.add_argument("--hermes-skills", default="")
+    parser.add_argument("--opencode-binary", default="opencode")
+    parser.add_argument("--opencode-timeout", type=int, default=180)
+    parser.add_argument("--opencode-model", default="")
     parser.add_argument("--vault", default="data-issue-vault")
     args = parser.parse_args()
 
@@ -189,12 +216,19 @@ def main() -> None:
         vault_root=Path(args.vault),
         ai_provider=build_ai_provider(
             args.provider,
+            codex_binary=args.codex_binary,
+            codex_timeout=args.codex_timeout,
+            codex_model=args.codex_model,
+            codex_cwd=args.codex_cwd,
             hermes_binary=args.hermes_binary,
             hermes_timeout=args.hermes_timeout,
             hermes_model=args.hermes_model,
             hermes_provider=args.hermes_provider,
             hermes_toolsets=args.hermes_toolsets,
             hermes_skills=args.hermes_skills,
+            opencode_binary=args.opencode_binary,
+            opencode_timeout=args.opencode_timeout,
+            opencode_model=args.opencode_model,
         ),
     )
 

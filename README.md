@@ -17,17 +17,16 @@ Open:
 
 Use `--provider fake` when setting up a new machine or when the available model is weak/unreliable. It keeps the UI and storage path testable without external AI.
 
-To route AI Helper through Hermes Agent, use the Hermes provider and pass model/skill options when needed:
+To route AI Helper through Codex on this machine:
 
 ```bash
 python3 -m app.backend.server \
-  --provider hermes \
-  --hermes-model company/MiniMax-M2.7 \
-  --hermes-skills pdca-gate \
-  --port 8765
+  --provider codex \
+  --codex-cwd /Users/yangcui/Research/pdca_dashboard \
+  --port 8768
 ```
 
-The Hermes provider calls `hermes -z` in one-shot mode. Hermes loads tools, rules, memory, `AGENTS.md`, and preloaded skills, so this path preserves agent/skill behavior better than a direct model API call.
+For the company Windows + OpenCode handoff path, start the same app with `--provider opencode` and an internal model id. See `docs/AI_PROVIDER_SETUP.md` for the exact commands and provider boundary.
 
 ## Tests
 
@@ -81,6 +80,7 @@ Actual notes under `data-issue-vault/` are ignored by `.gitignore`.
 
 - `AGENTS.md`: project instructions for coding agents.
 - `CLAUDE.md`: Claude-compatible entry point.
+- `docs/AI_PROVIDER_SETUP.md`: Codex and Windows/OpenCode provider setup.
 - `docs/PROJECT_STRUCTURE.md`: file responsibilities.
 - `docs/WEAK_MODEL_CONSTRAINTS.md`: rules for DeepSeek/GLM/other weaker models.
 - `docs/NEXT_PLAN.md`: next implementation plan and stopping points.

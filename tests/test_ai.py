@@ -3,7 +3,7 @@ import unittest
 from pathlib import Path
 from unittest.mock import patch
 
-from app.backend.ai import FakeAIProvider, HermesCLIProvider
+from app.backend.ai import CodexCLIProvider, FakeAIProvider, HermesCLIProvider, OpenCodeCLIProvider
 from app.backend.prompts import render_prompt
 from app.backend.server import build_ai_provider
 
@@ -53,6 +53,38 @@ class AITests(unittest.TestCase):
         self.assertIn("--skills", args)
         self.assertIn("pdca-gate,stock-analysis", args)
 
+    def test_codex_provider_calls_exec_readonly_ephemeral(self):
+        completed = subprocess.CompletedProcess(args=["codex"], returncode=0, stdout="Codex 输出\n", stderr="")
+        with patch("subprocess.run", return_value=completed) as run:
+            provider = CodexCLIProvider(binary="codex", cwd="/tmp/workbench", model="gpt-5")
+            result = provider.complete("请整理")
+        self.assertEqual(result, "Codex 输出")
+        args = run.call_args.args[0]
+        self.assertEqual(args[:2], ["codex", "exec"])
+        self.assertIn("-C", args)
+        self.assertIn("/tmp/workbench", args)
+        self.assertIn("--sandbox", args)
+        self.assertIn("read-only", args)
+        self.assertIn("--ask-for-approval", args)
+        self.assertIn("never", args)
+        self.assertIn("--ephemeral", args)
+        self.assertIn("--model", args)
+        self.assertIn("gpt-5", args)
+        self.assertEqual(args[-1], "-")
+        self.assertEqual(run.call_args.kwargs["input"], "请整理")
+
+    def test_opencode_provider_calls_run_for_windows_handoff(self):
+        completed = subprocess.CompletedProcess(args=["opencode"], returncode=0, stdout="OpenCode 输出\n", stderr="")
+        with patch("subprocess.run", return_value=completed) as run:
+            provider = OpenCodeCLIProvider(binary="opencode", model="company/MiniMax-M2.7")
+            result = provider.complete("请整理")
+        self.assertEqual(result, "OpenCode 输出")
+        args = run.call_args.args[0]
+        self.assertEqual(args[:2], ["opencode", "run"])
+        self.assertIn("--model", args)
+        self.assertIn("company/MiniMax-M2.7", args)
+        self.assertEqual(run.call_args.kwargs["input"], "请整理")
+
     def test_build_ai_provider_passes_hermes_agent_options(self):
         provider = build_ai_provider(
             "hermes",
@@ -67,6 +99,29 @@ class AITests(unittest.TestCase):
         self.assertEqual(provider.inference_provider, "company")
         self.assertEqual(provider.toolsets, "mcp,skills")
         self.assertEqual(provider.skills, "pdca-gate")
+
+    def test_build_ai_provider_supports_codex_and_opencode(self):
+        codex = build_ai_provider(
+            "codex",
+            codex_binary="codex",
+            codex_model="gpt-5",
+            codex_timeout=180,
+            codex_cwd="/tmp/workbench",
+        )
+        self.assertIsInstance(codex, CodexCLIProvider)
+        self.assertEqual(codex.model, "gpt-5")
+        self.assertEqual(codex.timeout_seconds, 180)
+        self.assertEqual(codex.cwd, "/tmp/workbench")
+
+        opencode = build_ai_provider(
+            "opencode",
+            opencode_binary="opencode",
+            opencode_model="company/MiniMax-M2.7",
+            opencode_timeout=240,
+        )
+        self.assertIsInstance(opencode, OpenCodeCLIProvider)
+        self.assertEqual(opencode.model, "company/MiniMax-M2.7")
+        self.assertEqual(opencode.timeout_seconds, 240)
 
     def test_pdca_gate_prompt_replaces_input_marker(self):
         prompt = render_prompt(Path("app/prompts/pdca_gate.md"), "今天我觉得推进慢，因为对方不配合")
