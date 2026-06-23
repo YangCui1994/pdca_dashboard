@@ -9,9 +9,9 @@
   --orange: #d94b26;
   --green: #068b42;
   --amber: #bd6b00;
-  --radius-xl: 28px;
-  --radius-lg: 18px;
-  --radius-md: 12px;
+  --radius-xl: 14px;
+  --radius-lg: 9px;
+  --radius-md: 6px;
   font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
   background: #fafafa;
   color: var(--ink);
@@ -48,7 +48,7 @@ h2 {
 button,
 .nav-button {
   border: 1px solid #cfd5df;
-  border-radius: 999px;
+  border-radius: 9px;
   background: #20232d;
   color: #ffffff;
   padding: 9px 14px;
@@ -156,7 +156,7 @@ textarea {
 }
 
 .segmented-actions {
-  border-radius: 999px;
+  border-radius: 12px;
   background: #e2e5eb;
   padding: 5px;
 }
@@ -178,7 +178,7 @@ textarea {
   margin: 0 auto;
   max-width: 1500px;
   border: 1px solid var(--line);
-  border-radius: 30px;
+  border-radius: 15px;
   background: var(--canvas);
   box-shadow: 0 18px 50px rgba(28, 31, 38, 0.08);
   padding: 18px;
@@ -191,7 +191,7 @@ textarea {
 }
 
 .nav-item {
-  border-radius: 14px;
+  border-radius: 7px;
   background: #e9ecf1;
   color: #4f5665;
   padding: 11px 12px;
@@ -206,7 +206,7 @@ textarea {
 }
 
 .nav-note {
-  border-radius: 14px;
+  border-radius: 7px;
   background: #f4f0e9;
   padding: 12px;
   color: #473a28;
@@ -227,9 +227,9 @@ textarea {
 
 .new-task-form {
   display: grid;
-  grid-template-columns: minmax(180px, 280px) minmax(320px, 1fr) auto;
+  grid-template-columns: 1fr;
   gap: 12px;
-  align-items: end;
+  align-items: stretch;
 }
 
 .new-task-form label {
@@ -265,7 +265,7 @@ textarea {
 }
 
 .section-heading strong {
-  border-radius: 999px;
+  border-radius: 8px;
   background: #eef0f4;
   padding: 8px 10px;
   color: #4b515e;
@@ -276,7 +276,7 @@ textarea {
   overflow: hidden;
   height: 16px;
   margin-top: 16px;
-  border-radius: 999px;
+  border-radius: 8px;
   background: #dee2e8;
 }
 
@@ -298,7 +298,7 @@ textarea {
   grid-template-columns: auto 1fr auto;
   gap: 12px;
   align-items: center;
-  border-radius: 14px;
+  border-radius: 7px;
   padding: 12px;
   font-size: 13px;
 }
@@ -328,7 +328,7 @@ textarea {
   display: inline-flex;
   align-items: center;
   gap: 10px;
-  border-radius: 999px;
+  border-radius: 8px;
   background: #f0f2f5;
   padding: 10px 12px;
   color: #4f5665;
@@ -338,7 +338,7 @@ textarea {
 
 .dot {
   min-width: 24px;
-  border-radius: 999px;
+  border-radius: 8px;
   background: #20232d;
   padding: 2px 7px;
   color: #ffffff;
@@ -371,7 +371,7 @@ textarea {
 
 .board-column-header strong {
   min-width: 24px;
-  border-radius: 999px;
+  border-radius: 8px;
   background: #e4e7eb;
   padding: 2px 7px;
   text-align: center;
@@ -388,7 +388,7 @@ textarea {
   display: grid;
   gap: 8px;
   border: 1px solid var(--line);
-  border-radius: 14px;
+  border-radius: 7px;
   background: #ffffff;
   color: inherit;
   padding: 12px;
@@ -560,7 +560,7 @@ textarea {
 }
 
 .document-tabs .nav-item {
-  border-radius: 999px;
+  border-radius: 7px;
   padding: 8px 12px;
 }
 
