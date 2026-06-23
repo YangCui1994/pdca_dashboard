@@ -10,9 +10,24 @@ from app.backend.ai import FakeAIProvider, HermesCLIProvider
 from app.backend.app_state import WorkbenchApp
 
 
-def build_ai_provider(name: str):
+def build_ai_provider(
+    name: str,
+    hermes_binary: str = "hermes",
+    hermes_timeout: int = 120,
+    hermes_model: str = "",
+    hermes_provider: str = "",
+    hermes_toolsets: str = "",
+    hermes_skills: str = "",
+):
     if name == "hermes":
-        return HermesCLIProvider()
+        return HermesCLIProvider(
+            binary=hermes_binary,
+            timeout_seconds=hermes_timeout,
+            model=hermes_model,
+            inference_provider=hermes_provider,
+            toolsets=hermes_toolsets,
+            skills=hermes_skills,
+        )
     if name == "fake":
         return FakeAIProvider()
     raise ValueError(f"Unsupported provider: {name}")
@@ -149,13 +164,27 @@ def main() -> None:
     parser.add_argument("--host", default="127.0.0.1")
     parser.add_argument("--port", type=int, default=8765)
     parser.add_argument("--provider", choices=["fake", "hermes"], default="fake")
+    parser.add_argument("--hermes-binary", default="hermes")
+    parser.add_argument("--hermes-timeout", type=int, default=120)
+    parser.add_argument("--hermes-model", default="")
+    parser.add_argument("--hermes-provider", default="")
+    parser.add_argument("--hermes-toolsets", default="")
+    parser.add_argument("--hermes-skills", default="")
     parser.add_argument("--vault", default="data-issue-vault")
     args = parser.parse_args()
 
     WorkbenchHandler.static_root = Path("app/frontend").resolve()
     WorkbenchHandler.app_state = WorkbenchApp(
         vault_root=Path(args.vault),
-        ai_provider=build_ai_provider(args.provider),
+        ai_provider=build_ai_provider(
+            args.provider,
+            hermes_binary=args.hermes_binary,
+            hermes_timeout=args.hermes_timeout,
+            hermes_model=args.hermes_model,
+            hermes_provider=args.hermes_provider,
+            hermes_toolsets=args.hermes_toolsets,
+            hermes_skills=args.hermes_skills,
+        ),
     )
 
     server = ThreadingHTTPServer((args.host, args.port), WorkbenchHandler)

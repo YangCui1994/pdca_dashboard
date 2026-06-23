@@ -17,6 +17,18 @@ Open:
 
 Use `--provider fake` when setting up a new machine or when the available model is weak/unreliable. It keeps the UI and storage path testable without external AI.
 
+To route AI Helper through Hermes Agent, use the Hermes provider and pass model/skill options when needed:
+
+```bash
+python3 -m app.backend.server \
+  --provider hermes \
+  --hermes-model company/MiniMax-M2.7 \
+  --hermes-skills pdca-gate \
+  --port 8765
+```
+
+The Hermes provider calls `hermes -z` in one-shot mode. Hermes loads tools, rules, memory, `AGENTS.md`, and preloaded skills, so this path preserves agent/skill behavior better than a direct model API call.
+
 ## Tests
 
 ```bash

@@ -46,7 +46,7 @@ Goal: connect a real provider behind the existing `AIProvider` abstraction and m
 
 Build next:
 
-- Verify the intended runtime provider: Hermes, local CLI, or another explicit command-line provider.
+- Verify the intended runtime provider options for Hermes Agent: model, provider, toolsets, and skills.
 - Keep `FakeAIProvider` as the default safe setup/testing provider.
 - Add or adjust provider error handling in `app/backend/ai.py`.
 - Ensure `/api/document-helper` returns a draft only and never writes task files before user confirmation.

@@ -26,7 +26,7 @@ It also owns status moves, event appends, PDCA input/review logs, and context re
 app/backend/ai.py
 ```
 
-AI provider abstraction. `FakeAIProvider` is the default safe provider for setup/testing. `HermesCLIProvider` calls a local Hermes CLI.
+AI provider abstraction. `FakeAIProvider` is the default safe provider for setup/testing. `HermesCLIProvider` calls local Hermes Agent with `hermes -z` and can preload model, provider, toolset, and skill options so the external agent can retain its tool/skill behavior.
 
 ```text
 app/backend/models.py

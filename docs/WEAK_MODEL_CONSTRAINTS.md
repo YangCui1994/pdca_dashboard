@@ -19,7 +19,7 @@ The app structure is intentionally stable. Do not refactor the backend/frontend 
 
 Expected weak-model work:
 
-- Connect or adjust an AI provider behind `app/backend/ai.py`.
+- Connect or adjust an AI provider behind `app/backend/ai.py`; prefer Hermes Agent one-shot mode (`hermes -z`) when skills/tools are required.
 - Keep `/api/document-helper` as a draft-only flow: AI returns Markdown, the user reviews it, then the user saves it.
 - Improve prompt text or provider error messages when needed.
 - Add focused tests for provider selection, route behavior, and draft output.

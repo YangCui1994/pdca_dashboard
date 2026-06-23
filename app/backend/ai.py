@@ -18,12 +18,25 @@ class FakeAIProvider:
 
 @dataclass
 class HermesCLIProvider:
-    binary: str = "/Users/yang/.local/bin/hermes"
+    binary: str = "hermes"
     timeout_seconds: int = 120
+    model: str = ""
+    inference_provider: str = ""
+    toolsets: str = ""
+    skills: str = ""
 
     def complete(self, prompt: str) -> str:
+        args = [self.binary, "-z", prompt]
+        if self.model:
+            args.extend(["--model", self.model])
+        if self.inference_provider:
+            args.extend(["--provider", self.inference_provider])
+        if self.toolsets:
+            args.extend(["--toolsets", self.toolsets])
+        if self.skills:
+            args.extend(["--skills", self.skills])
         completed = subprocess.run(
-            [self.binary, "-z", prompt],
+            args,
             check=False,
             capture_output=True,
             text=True,
