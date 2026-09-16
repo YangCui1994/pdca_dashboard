@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<title>项目流图 · proj-atlas(演示 Artifact)</title>
+<style>
+  :root {
+    --canvas: #F7F8FA; --card: #FFFFFF; --border: #E9E9F2;
+    --purple: #6C5CE7; --purple-deep: #5B4BC4; --purple-soft: #EFEBFF;
+    --orange: #E8890C; --orange-soft: #FDF3E3;
+    --text: #1F2333; --sub: #6B7280; --faint: #9CA3AF;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background: var(--canvas); color: var(--text);
+         font: 14px/1.6 -apple-system, "PingFang SC", "Microsoft YaHei", sans-serif; padding: 28px; }
+  header { margin-bottom: 18px; }
+  h1 { font-size: 18px; }
+  .meta { color: var(--faint); font-size: 12px; margin-top: 4px; }
+  .wrap { display: flex; gap: 16px; align-items: flex-start; }
+  .flow { display: flex; flex-direction: column; gap: 0; width: 340px; }
+  .node { background: var(--card); border: 1px solid var(--border); border-radius: 12px;
+          padding: 12px 14px; cursor: pointer; transition: border-color .15s; }
+  .node:hover { border-color: var(--purple); }
+  .node.active { border-color: var(--purple); background: var(--purple-soft); }
+  .node h2 { font-size: 14px; display: flex; align-items: center; gap: 6px; }
+  .node p { font-size: 12px; color: var(--sub); margin-top: 3px; }
+  .node .tag { font-size: 11px; border-radius: 99px; padding: 1px 8px; }
+  .tag.decision { background: var(--orange-soft); color: var(--orange); }
+  .tag.resource { background: var(--purple-soft); color: var(--purple-deep); }
+  .tag.action   { background: #E6F5EC; color: #2E9E5B; }
+  .arrow { width: 2px; height: 18px; background: var(--border); margin-left: 26px; }
+  .detail { flex: 1; background: var(--card); border: 1px solid var(--border);
+            border-radius: 12px; padding: 16px 18px; min-height: 320px; }
+  .detail h3 { font-size: 15px; margin-bottom: 6px; }
+  .detail .kind { font-size: 12px; color: var(--purple-deep); margin-bottom: 10px; }
+  .detail ul { margin: 8px 0 0 18px; color: var(--sub); font-size: 13px; }
+  .detail .rel { margin-top: 12px; font-size: 12px; color: var(--faint); }
+  .note { margin-top: 18px; background: var(--card); border: 1px dashed var(--border);
+          border-radius: 12px; padding: 12px 16px; font-size: 12px; color: var(--sub); }
+  .note code { display: block; white-space: pre-wrap; margin-top: 8px;
+               background: var(--canvas); border-radius: 8px; padding: 10px;
+               font: 12px/1.5 ui-monospace, Menlo, monospace; color: var(--text); }
+</style>
+</head>
+<body>
+<header>
+  <h1>项目流图 · 星图演示库</h1>
+  <div class="meta">来源项目 ID:proj-atlas · 自包含 HTML(内联 CSS/JS,无任何外部引用,断网可交互)· 全部为虚构演示数据</div>
+</header>
+
+<div class="wrap">
+  <div class="flow" id="flow">
+    <div class="node" data-id="project" onclick="selectNode('project')">
+      <h2>项目 <span class="tag resource">星图演示库</span></h2>
+      <p>目标:为工作台样片提供一套可整理的虚构资料库</p>
+    </div>
+    <div class="arrow"></div>
+    <div class="node" data-id="decision" onclick="selectNode('decision')">
+      <h2>决策 <span class="tag decision">已确认</span></h2>
+      <p>演示条目一律使用虚构命名</p>
+    </div>
+    <div class="arrow"></div>
+    <div class="node" data-id="resource" onclick="selectNode('resource')">
+      <h2>资源 <span class="tag resource">wiki.internal.example.net(虚构)</span></h2>
+      <p>资料与链接节点的演示资源组</p>
+    </div>
+    <div class="arrow"></div>
+    <div class="node" data-id="action" onclick="selectNode('action')">
+      <h2>下一行动 <span class="tag action">进行中</span></h2>
+      <p>act-002 清理重复演示条目</p>
+    </div>
+  </div>
+
+  <div class="detail" id="detail"></div>
+</div>
+
+<div class="note">
+  下面这段 Mermaid 源文本<b>仅用于 Mermaid 能力探测</b>,本页不加载任何 Mermaid 运行时,
+  渲染关系完全由上方内联 JavaScript 实现:
+<code>```mermaid
+graph TD
+  P[项目 proj-atlas] --> D[决策:虚构命名]
+  P --> R[资源:演示 wiki]
+  D --> A[下一行动:清理重复条目]
+  R --> A
+```</code>
+</div>
+
+<script>
+  var NODES = {
+    project: {
+      title: "项目 · 星图演示库",
+      kind: "聚合根 · proj-atlas",
+      items: [
+        "阶段:执行期;负责人:林演示(虚构)",
+        "下一个里程碑:完成 200 条演示条目归档",
+        "当前焦点:清理重复条目并补齐关键判断"
+      ],
+      rel: "关联:决策 1 项 · 资源 1 组 · 下一行动 1 项"
+    },
+    decision: {
+      title: "决策 · 演示条目一律使用虚构命名",
+      kind: "Decision(关键判断)",
+      items: [
+        "确认时间:演示数据,相对今天 -3 天",
+        "影响范围:全部演示条目与对外材料",
+        "状态:已确认(绿色)"
+      ],
+      rel: "上游:项目 proj-atlas · 下游:下一行动 act-002"
+    },
+    resource: {
+      title: "资源 · 演示 wiki 链接组",
+      kind: "Resource(资料与链接)",
+      items: [
+        "演示链接:https://wiki.internal.example.net/atlas(虚构占位域名)",
+        "类型:内网链接(演示);不含任何真实凭据",
+        "最后使用:演示数据"
+      ],
+      rel: "上游:项目 proj-atlas · 下游:下一行动 act-002"
+    },
+    action: {
+      title: "下一行动 · 清理重复演示条目",
+      kind: "Action(act-002 · 进行中)",
+      items: [
+        "最近一次有意义更新:20 天前(已进入长期停滞)",
+        "等待 AI Proposal 确认后可恢复/调整",
+        "接受 Proposal 前正式状态不变"
+      ],
+      rel: "上游:决策(虚构命名) · 资源(演示 wiki) · 归属:proj-atlas"
+    }
+  };
+
+  function selectNode(id) {
+    var nodes = document.querySelectorAll(".node");
+    for (var i = 0; i < nodes.length; i++) {
+      nodes[i].classList.toggle("active", nodes[i].getAttribute("data-id") === id);
+    }
+    var data = NODES[id];
+    var detail = document.getElementById("detail");
+    var html = "<h3>" + data.title + "</h3><div class='kind'>" + data.kind + "</div><ul>";
+    for (var j = 0; j < data.items.length; j++) {
+      html += "<li>" + data.items[j] + "</li>";
+    }
+    html += "</ul><div class='rel'>" + data.rel + "</div>";
+    detail.innerHTML = html;
+  }
+
+  selectNode("project");
+</script>
+</body>
+</html>

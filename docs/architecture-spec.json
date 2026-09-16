@@ -1,0 +1,210 @@
+{
+  "schema_version": 1,
+  "diagram_type": "architecture",
+  "meta": {
+    "title": "GLM 个人工作台 v2 · 运行时架构（含 UX 原型包）",
+    "locale": "zh-CN"
+  },
+  "layout": {
+    "mode": "grid",
+    "cols": 5,
+    "cellW": 260,
+    "cellH": 96,
+    "gapX": 60,
+    "gapY": 70
+  },
+  "components": [
+    {
+      "id": "flet-main",
+      "type": "frontend",
+      "label": "workbench/main.py",
+      "sublabel": "Flet 装配 · 路由",
+      "row": 1,
+      "col": 0
+    },
+    {
+      "id": "views",
+      "type": "frontend",
+      "label": "views/ ×7",
+      "sublabel": "今天 · 想法 · 项目 · 活动",
+      "row": 1,
+      "col": 1
+    },
+    {
+      "id": "service",
+      "type": "backend",
+      "label": "WorkspaceService",
+      "sublabel": "唯一写者 · 提案确认",
+      "row": 1,
+      "col": 2
+    },
+    {
+      "id": "storage",
+      "type": "database",
+      "label": "WorkspaceStorage",
+      "sublabel": "JSON+MD · 冲突拒绝",
+      "row": 1,
+      "col": 3
+    },
+    {
+      "id": "vault",
+      "type": "database",
+      "label": "data-issue-vault/v2",
+      "sublabel": "days/ · projects/ · ideas",
+      "row": 1,
+      "col": 4
+    },
+    {
+      "id": "runtime",
+      "type": "backend",
+      "label": "runtime/ 网关",
+      "sublabel": "流式网关 · 接收运行审查",
+      "row": 2,
+      "col": 0
+    },
+    {
+      "id": "openai-runtime",
+      "type": "external",
+      "label": "OpenAI 兼容端点",
+      "sublabel": "SSE · Proposal",
+      "row": 2,
+      "col": 1
+    },
+    {
+      "id": "models",
+      "type": "backend",
+      "label": "domain/models.py",
+      "sublabel": "DayRecord(+Check/Act)",
+      "row": 2,
+      "col": 3
+    },
+    {
+      "id": "uxbase",
+      "type": "backend",
+      "label": "prototypes/uxbase",
+      "sublabel": "提示词库 · watcher · seed",
+      "row": 3,
+      "col": 2
+    },
+    {
+      "id": "prompts",
+      "type": "database",
+      "label": "prompts/ 双轴",
+      "sublabel": "stages ×5 · thinking ×4",
+      "row": 3,
+      "col": 3
+    },
+    {
+      "id": "prototypes",
+      "type": "frontend",
+      "label": "原型 A–E",
+      "sublabel": "原型 A–E",
+      "row": 3,
+      "col": 1
+    }
+  ],
+  "boundaries": [
+    {
+      "kind": "region",
+      "label": "Flet 桌面应用（正式版 v2）",
+      "wraps": [
+        "flet-main",
+        "views"
+      ]
+    },
+    {
+      "kind": "region",
+      "label": "领域 + 服务（唯一写者边界）",
+      "wraps": [
+        "service",
+        "models"
+      ]
+    },
+    {
+      "kind": "region",
+      "label": "持久化",
+      "wraps": [
+        "storage",
+        "vault"
+      ]
+    },
+    {
+      "kind": "region",
+      "label": "UX 实验包（不触真实数据）",
+      "wraps": [
+        "uxbase",
+        "prompts",
+        "prototypes"
+      ]
+    }
+  ],
+  "connections": [
+    {
+      "id": "c1",
+      "from": "flet-main",
+      "to": "views",
+      "label": "装配"
+    },
+    {
+      "id": "c2",
+      "from": "views",
+      "to": "service",
+      "label": "读写"
+    },
+    {
+      "id": "c3",
+      "from": "flet-main",
+      "to": "runtime"
+    },
+    {
+      "id": "c4",
+      "from": "runtime",
+      "to": "openai-runtime",
+      "label": "provider=openai",
+      "variant": "dashed"
+    },
+    {
+      "id": "c5",
+      "from": "openai-runtime",
+      "to": "service",
+      "label": "Proposal→人工接受才落盘",
+      "variant": "dashed"
+    },
+    {
+      "id": "c6",
+      "from": "service",
+      "to": "storage",
+      "label": "写盘"
+    },
+    {
+      "id": "c7",
+      "from": "storage",
+      "to": "vault",
+      "label": "JSON+MD"
+    },
+    {
+      "id": "c8",
+      "from": "service",
+      "to": "models",
+      "label": "数据契约"
+    },
+    {
+      "id": "c9",
+      "from": "prototypes",
+      "to": "uxbase",
+      "label": "复用底座"
+    },
+    {
+      "id": "c10",
+      "from": "uxbase",
+      "to": "prompts",
+      "label": "注册表"
+    },
+    {
+      "id": "c11",
+      "from": "uxbase",
+      "to": "service",
+      "label": "复用写接口 · file_route 自动追加(可撤销)"
+    }
+  ]
+}

@@ -1,0 +1,52 @@
+# macOS/editor noise
+.DS_Store
+*.swp
+*.swo
+
+# Python runtime artifacts
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.coverage
+htmlcov/
+.venv/
+venv/
+
+# JavaScript runtime artifacts
+node_modules/
+npm-debug.log*
+
+# Local secrets and machine-specific config
+.env
+.env.*
+!.env.example
+
+# Personal/generated workbench data
+每日随想/
+data-issue-vault/**/*
+!data-issue-vault/**/
+!data-issue-vault/**/.gitkeep
+
+# Local agent scratch space
+.scratch/
+
+# Local agent/tool working dirs (ZCode, Claude, etc.)
+.zcode/
+.claude/
+.v2c/
+.video_agent/
+
+# Code graph index cache
+.codegraph/
+
+# Generated visual-check artifacts (smoke-test screenshots/logs, reproducible)
+workbench/artifacts/
+docs/architecture.visual-check.*
+
+# Third-party reference clone: provenance + commit hash recorded in refs/SOURCES.md,
+# re-fetch locally instead of vendoring 34MB into git history
+refs/entp-manual/
+
+# Prototype demo vault: regenerable via `python -m prototypes.uxbase.seed_demo`,
+# may contain real notes typed during prototype testing - local only
+prototypes/ux-2026-09/demo_vault/
