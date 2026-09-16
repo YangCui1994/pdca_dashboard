@@ -54,8 +54,6 @@ Actual notes under `data-issue-vault/` are ignored by `.gitignore`. The prototyp
 
 ## Important Docs
 
-- `AGENTS.md`: project instructions for coding agents.
-- `CLAUDE.md`: Claude-compatible entry point.
 - `docs/PROJECT_STRUCTURE.md`: file responsibilities of the workbench app.
 - `docs/WORKBENCH_V2_USAGE.md`: usage, CLI flags, and vault migration.
 - `docs/NEXT_PLAN.md`: next implementation plan and stopping points.

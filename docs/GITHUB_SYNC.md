@@ -6,7 +6,6 @@ Sync these categories:
 
 - Workbench app code in `workbench/` and `prototypes/`
 - Workbench tests in `workbench/tests/`
-- Project instructions: `AGENTS.md`, `CLAUDE.md`
 - Docs in `docs/`
 - Project-local skills in `.agents/`
 - Reference index `refs/SOURCES.md`
