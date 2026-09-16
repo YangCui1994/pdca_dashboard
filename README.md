@@ -58,7 +58,6 @@ Actual notes under `data-issue-vault/` are ignored by `.gitignore`. The prototyp
 - `CLAUDE.md`: Claude-compatible entry point.
 - `docs/PROJECT_STRUCTURE.md`: file responsibilities of the workbench app.
 - `docs/WORKBENCH_V2_USAGE.md`: usage, CLI flags, and vault migration.
-- `docs/WEAK_MODEL_CONSTRAINTS.md`: rules for DeepSeek/GLM/other weaker models.
 - `docs/NEXT_PLAN.md`: next implementation plan and stopping points.
 - `docs/plans/` and `docs/superpowers/plans/`: implementation plans already executed or ready for future work.
 - `docs/ARCHIFY.md`, `docs/CODEGRAPH.md`, `docs/PONYTAIL.md`: third-party agent tools — install status and usage notes. Not part of the workbench runtime.
